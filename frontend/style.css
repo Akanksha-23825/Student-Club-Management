@@ -1,0 +1,82 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: url('bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* Dark overlay for readability */
+.container {
+  background: rgba(0, 0, 0, 0.65);
+  min-height: 100vh;
+  padding: 40px;
+  color: white;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+p {
+  text-align: center;
+  font-size: 18px;
+}
+
+.interests {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.interests label {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button {
+  display: block;
+  margin: 0 auto;
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  background: #00b4d8;
+  color: black;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #90e0ef;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 40px;
+}
+
+.card {
+  background: white;
+  color: black;
+  width: 260px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #0077b6;
+}
+
+.card span {
+  font-size: 13px;
+  color: #555;
+}

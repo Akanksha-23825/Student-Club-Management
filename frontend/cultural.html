@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cultural Clubs</title>
+</head>
+<body>
+
+<h2>Cultural Clubs</h2>
+<ul id="clubList"></ul>
+
+<script>
+fetch('http://localhost:3000/clubs/Cultural')
+  .then(res => res.json())
+  .then(data => {
+    const list = document.getElementById('clubList');
+    data.forEach(club => {
+      const li = document.createElement('li');
+      li.innerText = club.club_name + " - " + club.description;
+      list.appendChild(li);
+    });
+  });
+</script>
+
+</body>
+</html>

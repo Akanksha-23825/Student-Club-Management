@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Club Recommendation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Find Clubs Based on Your Interests 🎯</h1>
+
+<p>Select your interests:</p>
+
+<div>
+  <label><input type="checkbox" value="Coding"> Coding</label><br>
+  <label><input type="checkbox" value="Robotics"> Robotics</label><br>
+  <label><input type="checkbox" value="Music"> Music</label><br>
+  <label><input type="checkbox" value="Dance"> Dance</label><br>
+  <label><input type="checkbox" value="AI"> AI</label><br>
+  <label><input type="checkbox" value="Web Development"> Web Development</label>
+</div>
+
+<br>
+<button onclick="recommendClubs()">Recommend Clubs</button>
+
+<h2>Recommended Clubs</h2>
+<ul id="result"></ul>
+
+<script>
+function recommendClubs() {
+  const interests = [];
+  document.querySelectorAll('input[type=checkbox]:checked')
+    .forEach(cb => interests.push(cb.value));
+
+  fetch('http://localhost:3000/recommend/interests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ interests })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const list = document.getElementById('result');
+    list.innerHTML = '';
+    data.forEach(club => {
+      const li = document.createElement('li');
+      li.innerText = club.club_name + " - " + club.description;
+      list.appendChild(li);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
