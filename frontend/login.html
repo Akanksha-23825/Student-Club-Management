@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Student Club Management System</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background: #fff;
+      padding: 30px;
+      width: 350px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .login-box h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 15px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #667eea;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .login-box button:hover {
+      background: #5a67d8;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .footer-text {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h2>Student Login</h2>
+
+    <!-- IMPORTANT: onsubmit -->
+    <form onsubmit="loginUser(event)">
+      <input type="email" id="email" placeholder="College Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+
+    <div id="errorMsg" class="error"></div>
+
+    <div class="footer-text">
+      Student Club Management System
+    </div>
+  </div>
+
+  <script>
+    function loginUser(event) {
+      event.preventDefault(); // ⭐ VERY IMPORTANT
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      errorMsg.innerText = "";
+
+      fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // ✅ CONNECTS TO INDEX PAGE
+          window.location.href = "index.html";
+        } else {
+          errorMsg.innerText = "Invalid email or password";
+        }
+      })
+      .catch(() => {
+        errorMsg.innerText = "Server error. Please try again.";
+      });
+    }
+  </script>
+
+</body>
+</html>

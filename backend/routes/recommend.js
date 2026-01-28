@@ -1,30 +1,36 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../db');
+const db = require("../db");
 
-// POST: Recommend clubs based on selected interests
-router.post('/interests', (req, res) => {
-  const interests = req.body.interests;
+router.post("/", (req, res) => {
+  let interests = req.body.interests;
 
   if (!interests || interests.length === 0) {
     return res.json([]);
   }
 
-  const sql = `
-    SELECT DISTINCT 
-      c.club_name, 
-      c.category, 
-      c.description
+  // Trim and normalize interests
+  interests = interests.map(i => i.trim());
+  const placeholders = interests.map(() => "?").join(",");
+// Inside backend/routes/recommend.js
+const sql = `
+    SELECT 
+        c.club_name, 
+        c.category, 
+        c.description,
+        GROUP_CONCAT(ci.interest SEPARATOR ', ') AS matched_interests,
+        COUNT(ci.interest) AS match_count
     FROM clubs c
-    JOIN club_interests ci ON c.club_id = ci.club_id
-    JOIN interest i ON ci.interest_id = i.interest_id
-    WHERE i.name IN (?)
-  `;
+    JOIN club_interests ci ON c.club_name = ci.club_name
+    WHERE ci.interest IN (${placeholders})
+    GROUP BY c.club_name, c.category, c.description
+    ORDER BY match_count DESC;
+`;
 
-  db.query(sql, [interests], (err, results) => {
+  db.query(sql, interests, (err, results) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Database error' });
+      console.error("❌ Recommendation Error:", err);
+      return res.status(500).json({ error: "Database query failed" });
     }
     res.json(results);
   });

@@ -1,31 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Chatbot</title>
+  <meta charset="UTF-8">
+  <title>Club Chatbot | RVCE</title>
+  <style>
+    :root {
+      --primary-color: #6c63ff;
+      --bg-color: #f0f2f5;
+      --bot-bubble: #ffffff;
+      --user-bubble: #6c63ff;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 500px;
+      height: 600px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* Message Bubbles */
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 15px;
+      font-size: 15px;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: var(--bot-bubble);
+      color: #333;
+      border: 1px solid #ddd;
+      border-bottom-left-radius: 2px;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: var(--user-bubble);
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 15px;
+      background: white;
+      border-top: 1px solid #eee;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .chat-input button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0 20px;
+      margin-left: 10px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .chat-input button:hover {
+      background: #554ee8;
+    }
+
+    /* Scrollbar Styling */
+    .chat-box::-webkit-scrollbar { width: 6px; }
+    .chat-box::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+  </style>
 </head>
 <body>
 
-<h2>Student Club Chatbot</h2>
+<div class="chat-container">
+  <div class="chat-header">🤖 RVCE Club Assistant</div>
 
-<input type="text" id="msg" placeholder="Ask a question">
-<button onclick="askBot()">Ask</button>
+  <div id="chatBox" class="chat-box">
+    <div class="message bot">
+      Hi! I can give you detailed info about any club. Try asking "Tell me about Ashwa Racing" or just "What are the dance clubs?".
+    </div>
+  </div>
 
-<p id="reply"></p>
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Ask about clubs or interests..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
 
 <script>
-function askBot() {
-  const message = document.getElementById('msg').value;
+  function addMessage(text, type) {
+    const chatBox = document.getElementById("chatBox");
+    const div = document.createElement("div");
+    div.className = "message " + type;
+    // innerHTML handles bold text and breaks from the database
+    div.innerHTML = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-  fetch('http://localhost:3000/chatbot', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ message })
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById('reply').innerText = data.reply;
-  });
+  function sendMessage() {
+    const input = document.getElementById("userInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    addMessage(msg, "user");
+    input.value = "";
+
+    fetch("http://localhost:3000/api/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg })
+    })
+    .then(res => res.json())
+    .then(data => {
+      // Replaces newlines with <br> for HTML display
+      const formattedReply = data.reply.replace(/\n/g, "<br>");
+      addMessage(formattedReply, "bot");
+    })
+    .catch(() => {
+      addMessage("Sorry, I'm having trouble connecting to the club database. ❌", "bot");
+    });
+  }
+
+  function addMessage(text, type) {
+    const chatBox = document.getElementById("chatBox");
+    const div = document.createElement("div");
+    div.className = "message " + type;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (type === "bot") {
+        let i = 0;
+        // The replace allows us to render bold text properly while typing
+        const formattedText = text.replace(/\n/g, "<br>");
+        
+        function typeWriter() {
+            if (i < formattedText.length) {
+                // If we hit a tag like <br>, we want to skip it to avoid showing raw code
+                if (formattedText.substring(i, i + 4) === "<br>") {
+                    div.innerHTML += "<br>";
+                    i += 4;
+                } else {
+                    div.innerHTML += formattedText.charAt(i);
+                    i++;
+                }
+                setTimeout(typeWriter, 15); // Adjust speed here
+            }
+        }
+        typeWriter();
+    } else {
+        div.innerHTML = text;
+    }
 }
+
 </script>
 
 </body>

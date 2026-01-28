@@ -1,82 +1,184 @@
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: url('bg.jpg') no-repeat center center fixed;
-  background-size: cover;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
 }
 
-/* Dark overlay for readability */
-.container {
-  background: rgba(0, 0, 0, 0.65);
-  min-height: 100vh;
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 60px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #6a5acd;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white !important;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+/* HERO */
+.hero {
+    height: 75vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.hero-btn {
+    padding: 14px 30px;
+    background: white;
+    color: #764ba2;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* FEATURES */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+    padding: 60px;
+    background: #f5f5f5;
+}
+
+.feature-card {
+    padding: 30px;
+    border-radius: 15px;
+    color: white;
+    transition: transform 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-card h3 {
+    margin-bottom: 10px;
+}
+
+.feature-card a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* COLORS */
+.purple { background: #7b68ee; }
+.yellow { background: #f4b400; }
+.red { background: #e74c3c; }
+.blue { background: #3498db; }
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #222;
+    color: #aaa;
+}
+
+/* Page Header */
+.page-header {
+  text-align: center;
   padding: 40px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
   color: white;
+  border-radius: 12px;
+  margin-bottom: 30px;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-p {
-  text-align: center;
-  font-size: 18px;
-}
-
-.interests {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin: 30px 0;
-}
-
-.interests label {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button {
-  display: block;
-  margin: 0 auto;
-  padding: 12px 25px;
-  font-size: 16px;
-  border: none;
-  border-radius: 25px;
-  background: #00b4d8;
-  color: black;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #90e0ef;
-}
-
-.cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+/* Club Cards */
+.club-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 25px;
-  margin-top: 40px;
 }
 
-.card {
+.club-card {
   background: white;
-  color: black;
-  width: 260px;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
 }
 
-.card h3 {
-  margin-top: 0;
-  color: #0077b6;
+.club-card:hover {
+  transform: translateY(-5px);
 }
 
-.card span {
-  font-size: 13px;
-  color: #555;
+.club-card h2 {
+  color: #6c5ce7;
+  margin-bottom: 10px;
+}
+
+/* Achievements */
+.achievement-list {
+  padding-left: 18px;
+}
+
+.achievement-list li {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.achievement-list span {
+  color: gray;
+  font-size: 12px;
+}
+
+.year {
+  color: #888;
+  font-size: 12px;
+}
+
+.muted {
+  color: #999;
+  font-style: italic;
+}
+
+/* Technical header color */
+.tech-header {
+  background: linear-gradient(135deg, #1d2671, #c33764);
+}
+
+/* Technical card accent */
+.tech-card h2 {
+  color: #1d2671;
 }

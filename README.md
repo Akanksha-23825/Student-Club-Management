@@ -66,3 +66,8 @@ This approach avoids hard-coded logic and efficiently uses database relationship
 ```sql
 CREATE DATABASE student_club_db;
 USE student_club_db;
+
+
+👨‍🎓 Authors:
+Akanksha N
+Pranjal Vishal Usulkar

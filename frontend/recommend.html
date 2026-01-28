@@ -1,52 +1,271 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Club Recommendation</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Club Recommendation | RVCE</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+    }
+
+    .recommend-header {
+      background: linear-gradient(135deg, #6a5af9, #8360c3);
+      color: white;
+      padding: 50px 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .recommend-header h1 {
+      margin-bottom: 10px;
+      font-size: 36px;
+    }
+
+    .recommend-header p {
+      font-size: 18px;
+      opacity: 0.95;
+    }
+
+    .interest-section {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    h3 {
+      margin: 30px 0 15px;
+      color: #4b4b4b;
+      border-left: 5px solid #6a5af9;
+      padding-left: 10px;
+    }
+
+    .interest-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .interest-btn {
+      border: 2px solid #6a5af9;
+      background: white;
+      color: #333;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .interest-btn:hover {
+      background: #f0eeff;
+    }
+
+    .interest-btn.active {
+      background: #6a5af9;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .recommend-btn {
+      display: block;
+      margin: 40px auto;
+      background: #6a5af9;
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(106, 90, 249, 0.3);
+      transition: 0.3s;
+    }
+
+    .recommend-btn:hover {
+      background: #5646d1;
+      transform: translateY(-2px);
+    }
+
+    .results {
+      max-width: 1100px;
+      margin: 30px auto 60px;
+      padding: 0 20px;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      border-left: 6px solid #6a5af9;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card h3 {
+      margin: 0 0 10px;
+      color: #6a5af9;
+      font-size: 22px;
+      border: none;
+      padding: 0;
+    }
+
+    .result-card p {
+      margin: 8px 0;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .tag {
+      background: #f0eeff;
+      color: #6a5af9;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .no-result {
+      color: #888;
+      font-style: italic;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Find Clubs Based on Your Interests 🎯</h1>
-
-<p>Select your interests:</p>
-
-<div>
-  <label><input type="checkbox" value="Coding"> Coding</label><br>
-  <label><input type="checkbox" value="Robotics"> Robotics</label><br>
-  <label><input type="checkbox" value="Music"> Music</label><br>
-  <label><input type="checkbox" value="Dance"> Dance</label><br>
-  <label><input type="checkbox" value="AI"> AI</label><br>
-  <label><input type="checkbox" value="Web Development"> Web Development</label>
+<div class="recommend-header">
+  <h1>🎯 Club Recommendation</h1>
+  <p>Select your interests and discover clubs that match you</p>
 </div>
 
-<br>
-<button onclick="recommendClubs()">Recommend Clubs</button>
+<div class="interest-section">
+  
+ <div class="interest-section">
 
-<h2>Recommended Clubs</h2>
-<ul id="result"></ul>
+  <h3>🔧 Technical Interests</h3>
+  <div class="interest-grid">
+    <button class="interest-btn" data-interest="Coding">💻 Coding</button>
+    <button class="interest-btn" data-interest="Web Development">🌐 Web Development</button>
+    <button class="interest-btn" data-interest="AI">🧠 AI</button>
+    <button class="interest-btn" data-interest="Machine Learning">📊 Machine Learning</button>
+    <button class="interest-btn" data-interest="Robotics">🤖 Robotics</button>
+    <button class="interest-btn" data-interest="Cloud Computing">☁️ Cloud Computing</button>
+  </div>
+
+  <h3>🚀 Core Engineering & Research</h3>
+  <div class="interest-grid">
+    <button class="interest-btn" data-interest="Aerospace">🚀 Aerospace</button>
+    <button class="interest-btn" data-interest="Rocketry">🛰️ Rocketry</button>
+    <button class="interest-btn" data-interest="Astronomy">🌌 Astronomy</button>
+    <button class="interest-btn" data-interest="HAM Radio">📡 HAM Radio</button>
+    <button class="interest-btn" data-interest="Quantum Computing">⚛️ Quantum Computing</button>
+  </div>
+
+  <h3>🎭 Cultural & Creative</h3>
+  <div class="interest-grid">
+    <button class="interest-btn" data-interest="Music">🎵 Music</button>
+    <button class="interest-btn" data-interest="Dance">💃 Dance</button>
+    <button class="interest-btn" data-interest="Acting">🎭 Acting</button>
+    <button class="interest-btn" data-interest="Film Making">🎬 Film Making</button>
+    <button class="interest-btn" data-interest="Debate">🎤 Debate</button>
+    <button class="interest-btn" data-interest="Photography">📷 Photography</button>
+    <button class="interest-btn" data-interest="Fashion">👗 Fashion</button>
+    <button class="interest-btn" data-interest="Painting">🎨 Painting</button>
+    <button class="interest-btn" data-interest="Sketching">✏️ Sketching</button>
+    <button class="interest-btn" data-interest="Crochet">🧶 Crochet</button>
+  </div>
+
+  <h3>🌱 Social, Management & Leadership</h3>
+  <div class="interest-grid">
+    <button class="interest-btn" data-interest="Community Service">🤝 Community Service</button>
+    <button class="interest-btn" data-interest="Plantation">🌱 Plantation</button>
+    <button class="interest-btn" data-interest="Entrepreneurship">🚀 Entrepreneurship</button>
+    <button class="interest-btn" data-interest="Event Management">📅 Event Management</button>
+    <button class="interest-btn" data-interest="Leadership">🧑‍💼 Leadership</button>
+    <button class="interest-btn" data-interest="Teaching">🧑‍🏫 Teaching & Mentoring</button>
+    <button class="interest-btn" data-interest="Social Awareness">📢 Social Awareness</button>
+    <button class="interest-btn" data-interest="Public Policy">🏛️ Public Policy</button>
+  </div>
+
+</div>
+
+</div>
+
+<button class="recommend-btn" onclick="recommendClubs()">Find My Clubs</button>
+
+<div class="results">
+  <h2>Recommended Clubs</h2>
+  <div id="result"></div>
+</div>
 
 <script>
-function recommendClubs() {
-  const interests = [];
-  document.querySelectorAll('input[type=checkbox]:checked')
-    .forEach(cb => interests.push(cb.value));
-
-  fetch('http://localhost:3000/recommend/interests', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ interests })
-  })
-  .then(res => res.json())
-  .then(data => {
-    const list = document.getElementById('result');
-    list.innerHTML = '';
-    data.forEach(club => {
-      const li = document.createElement('li');
-      li.innerText = club.club_name + " - " + club.description;
-      list.appendChild(li);
+  // Handle Toggle logic for buttons
+  const buttons = document.querySelectorAll(".interest-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
     });
   });
-}
+
+  function recommendClubs() {
+    const selected = Array.from(document.querySelectorAll(".interest-btn.active"))
+      .map(btn => btn.dataset.interest);
+
+    const resultBox = document.getElementById("result");
+    resultBox.innerHTML = "";
+
+    if (selected.length === 0) {
+      resultBox.innerHTML = "<p class='no-result'>Please select at least one interest.</p>";
+      return;
+    }
+
+    fetch("http://localhost:3000/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ interests: selected })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        resultBox.innerHTML = "<p class='no-result'>No matching clubs found. Try selecting more interests!</p>";
+        return;
+      }
+
+   data.forEach(club => {
+  resultBox.innerHTML += `
+    <div class="result-card">
+      <span style="background: #eee; padding: 2px 8px; border-radius: 5px; font-size: 12px; color: #666;">
+        ${club.category}
+      </span>
+      <h3>${club.club_name}</h3>
+      <p>${club.description || 'No description available.'}</p>
+      <p style="font-size: 13px; color: #6a5af9;">
+        <strong>Matches:</strong> ${club.matched_interests}
+      </p>
+    </div>
+  
+        `;
+      });
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      resultBox.innerHTML = "<p class='no-result'>❌ Server error. Ensure the backend is running.</p>";
+    });
+  }
 </script>
 
 </body>

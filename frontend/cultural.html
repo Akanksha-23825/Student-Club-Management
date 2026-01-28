@@ -1,25 +1,233 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Cultural Clubs</title>
+  <meta charset="UTF-8">
+  <title>Cultural Clubs | RVCE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Hover specific styles */
+    .club-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .club-card {
+      position: relative;
+      width: 320px;
+      height: 280px;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      transition: transform 0.3s;
+    }
+
+    .club-card h2 { color: #6c63ff; margin-bottom: 10px; }
+
+    /* The sliding overlay */
+    .hover-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(108, 99, 255, 0.98);
+      color: white;
+      padding: 25px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      text-align: left;
+      transform: translateY(100%);
+      transition: transform 0.4s ease-in-out;
+      overflow-y: auto;
+    }
+
+    .club-card:hover .hover-overlay {
+      transform: translateY(0);
+    }
+
+    .hover-overlay h3 { 
+      margin-top: 0; 
+      font-size: 18px; 
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 5px;
+    }
+
+    .achievement-text {
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap; /* Preserves your line breaks from the database */
+    }
+    /* Modal Styling */
+.modal {
+  display: none; 
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 20px;
+  width: 70%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+}
+
+.close-button {
+  position: absolute;
+  right: 20px; top: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+}
+
+.modal-header-title {
+  color: #6c63ff;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.achievement-full-list {
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: #333;
+}
+
+/* Modal Background */
+.modal {
+  display: none; 
+  position: fixed;
+  z-index: 2000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Modal Box */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 40px;
+  border-radius: 20px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+/* Close Button */
+.close-button {
+  position: absolute;
+  right: 25px; top: 20px;
+  font-size: 35px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.close-button:hover { color: #333; }
+  </style>
 </head>
 <body>
 
-<h2>Cultural Clubs</h2>
-<ul id="clubList"></ul>
+<header class="page-header">
+  <h1>🎭 Cultural Clubs</h1>
+  <p>Arts, Music, Drama, Dance & Social Initiatives</p>
+</header>
+
+<div id="clubContainer" class="club-container"></div>
 
 <script>
-fetch('http://localhost:3000/clubs/Cultural')
-  .then(res => res.json())
-  .then(data => {
-    const list = document.getElementById('clubList');
-    data.forEach(club => {
-      const li = document.createElement('li');
-      li.innerText = club.club_name + " - " + club.description;
-      list.appendChild(li);
-    });
-  });
-</script>
+let allClubsData = []; // Global variable to store fetched data for the modal
 
+fetch("http://localhost:3000/api/clubs/cultural") // Change to /technical for technical.html
+  .then(response => response.json())
+  .then(data => {
+    allClubsData = data; // Store the results globally
+    const container = document.getElementById("clubContainer");
+    container.innerHTML = "";
+
+    data.forEach((club, index) => {
+      container.innerHTML += `
+        <div class="club-card" onclick="openModal(${index})">
+          <div class="card-content">
+            <h2>${club.club_name}</h2>
+            <p>${club.description ? club.description.substring(0, 80) + '...' : 'Click to learn more'}</p>
+          </div>
+          
+          <div class="hover-overlay">
+            <span>Click to View Achievements 🏆</span>
+          </div>
+        </div>
+      `;
+    });
+  })
+  .catch(err => console.error("Error loading clubs:", err));
+
+// Function to open the modal and show full details
+function openModal(index) {
+  const club = allClubsData[index];
+  const modal = document.getElementById("clubModal");
+  const modalBody = document.getElementById("modalBody");
+
+  modalBody.innerHTML = `
+    <h1 style="color: #6c63ff; border-bottom: 2px solid #eee; padding-bottom: 10px;">${club.club_name}</h1>
+    <p><strong>Category:</strong> ${club.category}</p>
+    <p><strong>Description:</strong> ${club.description}</p>
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+    <h3>🏆 Notable Achievements & Milestones</h3>
+    <div style="white-space: pre-wrap; line-height: 1.6; color: #333;">
+      ${club.achievement_text || "No achievements listed yet."}
+    </div>
+  `;
+  
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden"; // Prevent background scrolling
+}
+
+// Function to close the modal
+function closeModal() {
+  document.getElementById("clubModal").style.display = "none";
+  document.body.style.overflow = "auto";
+}
+
+// Close modal if user clicks the backdrop
+window.onclick = function(event) {
+  const modal = document.getElementById("clubModal");
+  if (event.target == modal) {
+    closeModal();
+  }
+}
+</script>
+<div id="clubModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeModal()">&times;</span>
+    <div id="modalBody">
+      </div>
+  </div>
+</div>
 </body>
 </html>
