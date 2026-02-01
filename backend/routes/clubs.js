@@ -43,7 +43,7 @@ router.get("/", (req, res) => {
     });
 });
 
-// 4. MANAGEMENT: Add or Update Club (The fix for your error)
+// 4. MANAGEMENT: Add or Update Club
 router.post("/manage", (req, res) => {
     const { club_name, category, description, achievement_text } = req.body;
 
@@ -58,7 +58,6 @@ router.post("/manage", (req, res) => {
             category = VALUES(category), 
             description = VALUES(description)`;
     
-    // NOTE: We use 'sqlClubs' here to match the variable above
     db.query(sqlClubs, [club_name, category, description], (err, result) => {
         if (err) {
             console.error("❌ Error updating clubs table:", err.message);
@@ -80,6 +79,33 @@ router.post("/manage", (req, res) => {
             res.json({ 
                 message: `Database successfully synchronized for ${club_name}!`,
                 status: "success" 
+            });
+        });
+    });
+});
+
+// 5. DELETE: Remove a club (Faculty Only)
+router.delete("/:name", (req, res) => {
+    const clubName = req.params.name;
+
+    // We must delete from child tables (achievements & interests) before the parent (clubs)
+    const sqlDeleteAchieve = "DELETE FROM club_achievements WHERE club_name = ?";
+    const sqlDeleteInterests = "DELETE FROM club_interests WHERE club_name = ?";
+    const sqlDeleteClub = "DELETE FROM clubs WHERE club_name = ?";
+
+    db.query(sqlDeleteAchieve, [clubName], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        db.query(sqlDeleteInterests, [clubName], (err2) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+
+            db.query(sqlDeleteClub, [clubName], (err3, result) => {
+                if (err3) return res.status(500).json({ error: err3.message });
+                
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ message: "No club found with that name." });
+                }
+                res.json({ message: `Successfully deleted ${clubName} from all tables.` });
             });
         });
     });
