@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-// ---------------------------------------------------------
 // 1. Get Cultural Clubs with Achievements
-// ---------------------------------------------------------
 router.get("/cultural", (req, res) => {
     const sql = `
         SELECT c.*, a.achievement_text 
@@ -18,25 +16,21 @@ router.get("/cultural", (req, res) => {
     });
 });
 
-// ---------------------------------------------------------
 // 2. Get Technical Clubs with Achievements
-// ---------------------------------------------------------
 router.get("/technical", (req, res) => {
- const sqlClubs = `
-        INSERT INTO clubs (club_name, category, description) 
-        VALUES (?, ?, ?) 
-        ON DUPLICATE KEY UPDATE 
-            category = VALUES(category), 
-            description = VALUES(description)`;
+    const sql = `
+        SELECT c.*, a.achievement_text 
+        FROM clubs c 
+        LEFT JOIN club_achievements a ON c.club_name = a.club_name 
+        WHERE c.category = 'Technical'`;
+        
     db.query(sql, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
 
-// ---------------------------------------------------------
-// 3. Get All Clubs (Master List) with Achievements
-// ---------------------------------------------------------
+// 3. Get All Clubs (Master List)
 router.get("/", (req, res) => {
     const sql = `
         SELECT c.*, a.achievement_text 
@@ -49,21 +43,14 @@ router.get("/", (req, res) => {
     });
 });
 
-// ---------------------------------------------------------
-// 4. MANAGEMENT: Add or Update Club (Faculty Only)
-// ---------------------------------------------------------
+// 4. MANAGEMENT: Add or Update Club (The fix for your error)
 router.post("/manage", (req, res) => {
     const { club_name, category, description, achievement_text } = req.body;
 
-    // Validation: Ensure required fields are present
     if (!club_name || !category) {
         return res.status(400).json({ error: "Club Name and Category are required." });
     }
 
-    /**
-     * STEP A: Update or Insert into the main 'clubs' table.
-     * We omit 'club_id' so MySQL can handle it via AUTO_INCREMENT.
-     */
     const sqlClubs = `
         INSERT INTO clubs (club_name, category, description) 
         VALUES (?, ?, ?) 
@@ -71,16 +58,13 @@ router.post("/manage", (req, res) => {
             category = VALUES(category), 
             description = VALUES(description)`;
     
+    // NOTE: We use 'sqlClubs' here to match the variable above
     db.query(sqlClubs, [club_name, category, description], (err, result) => {
         if (err) {
             console.error("❌ Error updating clubs table:", err.message);
             return res.status(500).json({ error: err.message });
         }
 
-        /**
-         * STEP B: Update or Insert into the 'club_achievements' table.
-         * Linking is done via 'club_name' to match your GET logic.
-         */
         const sqlAchieve = `
             INSERT INTO club_achievements (club_name, achievement_text) 
             VALUES (?, ?) 
