@@ -2,65 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Club Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | RVCE Club Management</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        if (!localStorage.getItem("role")) {
+            window.location.href = "login.html";
+        }
+    </script>
 </head>
 <body>
-
-    <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="logo">RVCE Clubs</div>
-        <ul class="nav-links">
-            <li><a href="cultural.html">Cultural</a></li>
-            <li><a href="technical.html">Technical</a></li>
-            <li><a href="recommend.html">Recommend</a></li>
-            <li><a href="chatbot.html">Chatbot</a></li>
-            <li><a class="login-btn" href="login.html">Login</a></li>
-        </ul>
+        <div class="logo-container">
+            <img src="images/images.png" alt="RVCE Logo" class="nav-logo">
+            <span class="logo-text">RVCE Clubs</span>
+        </div>
+        <ul class="nav-links" id="navLinks"></ul>
     </nav>
 
-    <!-- HERO SECTION -->
     <section class="hero">
-        <div class="hero-content">
-            <h1>Student Club Management System</h1>
-            <p>Discover, explore and join clubs that match your interests</p>
-            <a href="recommend.html" class="hero-btn">Get Club Recommendations</a>
+        <div class="hero-content" style="max-width: 720px;">
+            <h1>Elevate Your College Experience</h1>
+            <p style="margin: 0 auto;">Join elite technical teams, vibrant cultural groups, and lead community initiatives at RVCE.</p>
         </div>
     </section>
 
-    <!-- FEATURES -->
-    <section class="features">
+    <section class="stats-bar" style="background: var(--bg-2); padding: 20px 0; border-bottom: 1px solid rgba(15, 23, 42, 0.08);">
+        <div style="display: flex; justify-content: center; gap: 50px; text-align: center;">
+            <div><strong style="font-size: 24px; color: var(--ink);">35+</strong><p style="font-size: 12px; color: #64748b;">Active Clubs</p></div>
+            <div><strong style="font-size: 24px; color: var(--ink);">100+</strong><p style="font-size: 12px; color: #64748b;">Achievements</p></div>
+            <div><strong style="font-size: 24px; color: var(--ink);">24/7</strong><p style="font-size: 12px; color: #64748b;">AI Assistant</p></div>
+        </div>
+    </section>
 
-          <a href="cultural.html" class="feature-card purple card-link">
-            <h3>Cultural Clubs</h3>
-            <p>Music, Dance, Drama & Cultural Activities</p>
-            <span class="explore">Explore →</span>
-          </a>
+    <section class="features" id="featuresSection">
+        <h2 style="text-align: center; margin-top: 50px; font-weight: 800;">Explore Categories</h2>
+        <div class="feature-grid" id="mainGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
+            <a href="cultural.html" class="feature-card">
+                <div class="card-icon">🎭</div>
+                <h3>Cultural Clubs</h3>
+                <p>Music, Dance, and Performing Arts</p>
+                <span class="explore">Browse Groups →</span>
+            </a>
 
-          <a href="technical.html" class="feature-card yellow card-link">
-            <h3>Technical Clubs</h3>
-            <p>Coding, Robotics, AI & Innovation</p>
-            <span class="explore">Explore →</span>
-          </a>
+            <a href="technical.html" class="feature-card">
+                <div class="card-icon">💻</div>
+                <h3>Technical Clubs</h3>
+                <p>Coding, Robotics, AI, and Rocketry</p>
+                <span class="explore">Browse Teams →</span>
+            </a>
 
-          <a href="recommend.html" class="feature-card red card-link">
-            <h3>Club Recommendation</h3>
-            <p>Get clubs based on your interests</p>
-            <span class="explore">Recommend →</span>
-          </a>
+            <div id="statusCardContainer"></div>
+        </div>
+    </section>
 
-          <a href="chatbot.html" class="feature-card blue card-link">
-            <h3>Chatbot</h3>
-            <p>Ask questions about clubs</p>
-            <span class="explore">Chat →</span>
-          </a>
-
-        </section>
-
-    <!-- FOOTER -->
     <footer>
-        <p>© 2025 RV College of Engineering | Student Club Management System</p>
+        <p>© 2026 RV College of Engineering | Club Management Portal</p>
     </footer>
 
+    <a href="chatbot.html" class="chatbot-fab" aria-label="Open Chatbot" title="Open Chatbot">&#129302;</a>
+
+    <script>
+        const role = localStorage.getItem("role");
+        const username = localStorage.getItem("username");
+        const navLinks = document.getElementById("navLinks");
+        const statusCardContainer = document.getElementById("statusCardContainer");
+
+        function renderNavbar() {
+            let navContent = `<li><a href="recommend.html">Find My Club</a></li>`;
+
+            if (role === "student") {
+                navContent += `<li><a href="student_status.html" style="color: var(--brand); font-weight: 700;">My Status</a></li>`;
+
+                if (statusCardContainer) {
+                    statusCardContainer.innerHTML = `
+                        <a href="student_status.html" class="feature-card" style="border-color: var(--brand); background: #f0f9ff;">
+                            <div class="card-icon">📋</div>
+                            <h3>Application Status</h3>
+                            <p>Check your pending and active club memberships</p>
+                            <span class="explore" style="color: var(--brand);">View My Status →</span>
+                        </a>
+                    `;
+                }
+            }
+
+            if (role === "faculty") {
+                const featuresSection = document.getElementById("featuresSection");
+                if (featuresSection) featuresSection.style.display = "none";
+                navContent += `<li><a href="faculty_dashboard.html" style="color: var(--brand); font-weight: 800;">FACULTY PORTAL</a></li>`;
+            }
+
+            navContent += `
+                <li style="color: var(--ink); font-weight: 600; font-size: 14px; margin-left: 20px;">Welcome, ${username}</li>
+                <li><a class="login-btn" href="#" onclick="logout()">Logout</a></li>
+            `;
+
+            navLinks.innerHTML = navContent;
+        }
+
+        renderNavbar();
+
+        function logout() {
+            if(confirm("Are you sure you want to log out?")) {
+                localStorage.clear();
+                window.location.href = "login.html";
+            }
+        }
+    </script>
 </body>
 </html>
+

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications | RVCE Clubs</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background-color: var(--bg); }
+        .status-container { max-width: 900px; margin: 60px auto; padding: 0 20px 40px; }
+        .status-header { text-align: center; margin-bottom: 30px; }
+        .status-header h1 { color: var(--ink); font-weight: 800; }
+        .status-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-1);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-left: 8px solid #cbd5e1;
+            transition: transform 0.2s;
+        }
+        .status-card:hover { transform: translateY(-2px); }
+
+        .status-Active { border-left-color: #22c55e; }
+        .status-Pending { border-left-color: #eab308; }
+        .status-Rejected { border-left-color: #ef4444; }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-Active { background: #dcfce7; color: #166534; }
+        .badge-Pending { background: #fef9c3; color: #854d0e; }
+        .badge-Rejected { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="images/images.png" alt="RVCE Logo" class="nav-logo">
+            <span class="logo-text">RVCE Clubs</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cultural.html">Cultural</a></li>
+            <li><a href="technical.html">Technical</a></li>
+            <li><a class="login-btn" href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="status-container">
+        <div class="status-header">
+            <h1>My Membership Status</h1>
+            <p style="color: #64748b;">Track your applications and club memberships below.</p>
+        </div>
+
+        <div id="statusList">
+            <p>Loading your applications...</p>
+        </div>
+    </div>
+
+    <a href="chatbot.html" class="chatbot-fab" aria-label="Open Chatbot" title="Open Chatbot">&#129302;</a>
+
+    <script>
+        async function fetchMyStatus() {
+            const username = localStorage.getItem("username");
+            if (!username) {
+                alert("Please login to view your status.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/memberships/my-clubs/${username}`);
+                const applications = await res.json();
+
+                const list = document.getElementById("statusList");
+                if (applications.length === 0) {
+                    list.innerHTML = `
+                        <div style="text-align:center; padding: 40px;">
+                            <p>You haven't applied to any clubs yet.</p>
+                            <a href="index.html" style="color: var(--brand); font-weight:700;">Explore Clubs Now &rarr;</a>
+                        </div>`;
+                    return;
+                }
+
+                list.innerHTML = applications.map(app => `
+                    <div class="status-card status-${app.status}">
+                        <div>
+                            <h2 style="font-size: 20px; color: var(--ink);">${app.club_name}</h2>
+                            <p style="font-size: 14px; color: #64748b;">Applied on: ${new Date(app.joined_date).toLocaleDateString()}</p>
+                        </div>
+                        <span class="badge badge-${app.status}">${app.status}</span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById("statusList").innerHTML = "Error loading data.";
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        fetchMyStatus();
+    </script>
+</body>
+</html>
+
+

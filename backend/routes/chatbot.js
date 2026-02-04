@@ -19,7 +19,7 @@ router.post("/", (req, res) => {
   const isAchieveReq = cleanMsg.includes("achievement") || cleanMsg.includes("won") || cleanMsg.includes("award");
   const isEventReq = cleanMsg.includes("event") || cleanMsg.includes("workshop") || cleanMsg.includes("happen");
   const isActiveReq = cleanMsg.includes("active") || cleanMsg.includes("my club") || cleanMsg.includes("joined");
-  const isInterestReq = cleanMsg.includes("interest") || cleanMsg.includes("recommend") || cleanMsg.includes("suggest");
+  const isInterestReq = cleanMsg.includes("interest") || cleanMsg.includes("interested") || cleanMsg.includes("love") || cleanMsg.includes("recommend") || cleanMsg.includes("suggest");
 
   // 2. TARGETED KEYWORD EXTRACTION
   const stopPhrases = [
@@ -47,10 +47,10 @@ router.post("/", (req, res) => {
           const list = results.map(r => `• ${stripMd(r.club_name)}`).join('\n');
           return res.json({ reply: `You are an active member of:\n${list}` });
       });
-      return; // STOP execution here
+      return; 
   }
 
-  // 4. INTEREST-BASED RECOMMENDATION
+  // 4. INTEREST-BASED RECOMMENDATION (FIXED: Removed .substring)
   if (isInterestReq) {
       const interestPhrases = ["interest in", "interested in", "love", "recommend", "suggest"];
       let interestText = cleanMsg;
@@ -74,10 +74,12 @@ router.post("/", (req, res) => {
       db.query(sqlInterests, likeTerms, (iErr, rows) => {
           if (iErr) return res.status(500).json({ reply: "Database error." });
           if (rows.length === 0) return res.json({ reply: "I couldn't find clubs for those interests." });
-          const list = rows.map(c => `• ${stripMd(c.club_name)} (${stripMd(c.category)}): ${stripMd(c.description).substring(0, 60)}...`).join('\n');
-          return res.json({ reply: `Based on your interest, I recommend:\n${list}` });
+          
+          // FIXED: Removed .substring(0, 60) to show full description
+          const list = rows.map(c => `• ${stripMd(c.club_name)} (${stripMd(c.category)}): ${stripMd(c.description)}`).join('\n\n');
+          return res.json({ reply: `Based on your interest, I recommend:\n\n${list}` });
       });
-      return; // STOP execution here to prevent line 85 from running
+      return; 
   }
 
   // 5. POWERFUL MULTI-TABLE JOIN
@@ -108,7 +110,7 @@ router.post("/", (req, res) => {
       return res.json({ reply: `🏆 Achievements for ${stripMd(c.club_name)}:\n${stripMd(c.achievements) || "N/A"}` });
     }
 
-    return res.json({ reply: `📌 ${stripMd(c.club_name)} (${stripMd(c.category)})\n📖 ${stripMd(c.description)}\n🏆 Achievements: ${stripMd(c.achievements) || "N/A"}\n📅 Events: ${stripMd(c.upcoming_events) || "None"}` });
+    return res.json({ reply: `📌 ${stripMd(c.club_name)} (${stripMd(c.category)})\n📖 ${stripMd(c.description)}\n\n🏆 Achievements: ${stripMd(c.achievements) || "N/A"}\n\n📅 Events:\n${stripMd(c.upcoming_events) || "None"}` });
   });
 });
 

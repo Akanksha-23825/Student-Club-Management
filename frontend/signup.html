@@ -1,11 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Signup</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | RVCE Club Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-card {
+            width: 520px;
+            background: var(--card);
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-2);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: "";
+            position: absolute;
+            inset: -40% -20% auto auto;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.16), transparent 65%);
+            pointer-events: none;
+        }
+
+        .info-card h1 {
+            color: var(--ink);
+            margin-bottom: 12px;
+        }
+
+        .info-card p {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .info-card a {
+            display: inline-block;
+            background: var(--brand);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 10px 24px rgba(14, 165, 233, 0.35);
+        }
+    </style>
 </head>
-<body style="font-family:Arial; text-align:center; padding-top:50px;">
-    <h2>Signup Page</h2>
-    <p>(Backend connection will be added later)</p>
-    <a href="login.html">Back to Login</a>
+<body>
+    <div class="info-card">
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 10px;">
+            <img src="images/images.png" alt="RVCE Logo" style="height:36px; width:auto; object-fit:contain;">
+            <span style="font-family: var(--font-heading); font-weight:700; color: var(--ink); font-size:20px;">RVCE Clubs</span>
+        </div>
+        <h1>Create Your Account</h1>
+        <p>Sign-up is handled directly on the login page to keep things simple and secure.</p>
+        <a href="login.html">Go to Login</a>
+    </div>
 </body>
 </html>
+

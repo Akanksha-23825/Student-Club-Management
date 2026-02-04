@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Advisor Portal | RVCE</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
+        .admin-container { max-width: 900px; margin: 40px auto; background: var(--card); padding: 40px; border-radius: 24px; box-shadow: var(--shadow-1); border: 1px solid rgba(15,23,42,0.06); }
+        .mode-toggle { display: flex; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 30px; gap: 5px; }
+        .toggle-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; color: #64748b; background: transparent; transition: 0.3s; }
+        .toggle-btn.active { background: white; color: var(--brand); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        .section-title { grid-column: 1 / -1; font-size: 18px; font-weight: 700; color: var(--brand); border-bottom: 2px solid #eee; padding-bottom: 10px; margin: 20px 0 10px; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f8fafc; font-size: 14px; box-sizing: border-box; }
+        .save-btn { width: 100%; background: var(--brand); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .list-item { background: #f8fafc; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid #edf2f7; }
+        .selection-box { margin-bottom: 30px; padding: 20px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 16px; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1>🛡️ Faculty Advisor Portal</h1>
+            <p>Authorized access to manage club lifecycle and student memberships</p>
+        </div>
+
+        <div class="selection-box">
+            <label style="font-weight: 700; color: var(--brand); display: block; margin-bottom: 8px;">Select Club to Manage:</label>
+            <select id="clubSelector" onchange="handleClubSwitch()" style="border: 2px solid var(--brand); font-weight: 700;">
+                <option value="">-- Choose a Club --</option>
+            </select>
+        </div>
+
+        <div class="mode-toggle">
+            <button class="toggle-btn active" id="btnAchieve" onclick="switchTab('achieve')">Club Profile</button>
+            <button class="toggle-btn" id="btnEvent" onclick="switchTab('event')">Schedule Events</button>
+            <button class="toggle-btn" id="btnMember" onclick="switchTab('member')">Join Requests</button>
+        </div>
+
+        <div id="achieveTab" class="tab-content">
+            <div class="form-grid">
+                <div class="section-title">🏆 Update Club Achievements</div>
+                <textarea id="achievements" class="full-width" rows="6" placeholder="• New Achievement..."></textarea>
+                <div class="form-group"><input type="text" id="achTitle" placeholder="Achievement Title"></div>
+                <div class="form-group"><input type="text" id="achYear" placeholder="Year"></div>
+            </div>
+            <button class="save-btn" style="background: #0ea5e9;" onclick="addAchievementLine()">Add To List</button>
+            <button class="save-btn" onclick="saveAchievements()">Save All Achievements</button>
+        </div>
+
+        <div id="eventTab" class="tab-content" style="display:none;">
+            <div class="form-grid">
+                <div class="section-title">📅 Post New Event</div>
+                <input type="text" id="evName" class="full-width" placeholder="Event Name">
+                <input type="date" id="evDate">
+                <input type="text" id="evVenue" placeholder="Venue">
+                <textarea id="evDesc" class="full-width" rows="3" placeholder="Description"></textarea>
+            </div>
+            <button class="save-btn" style="background:#f97316" onclick="saveEvent()">Schedule & Notify</button>
+            <div class="section-title" style="margin-top: 30px;">📋 Scheduled Events</div>
+            <div id="postedEventsList">Select club...</div>
+        </div>
+
+        <div id="memberTab" class="tab-content" style="display:none;">
+            <div class="section-title">👥 Pending Applications</div>
+            <div id="requestList">Select club...</div>
+            <div class="section-title" style="margin-top: 30px;">✅ Active Members</div>
+            <div id="activeMembersList">Select club...</div>
+        </div>
+    </div>
+
+   <script>
+    // Ensure this matches your node server port exactly
+    const API_BASE = "http://localhost:3000";
+
+    let clubsCache = [];
+
+    // 1. POPULATE DROPDOWN (Fixed to prevent localhost:undefined)
+    async function populateClubs() {
+        const selector = document.getElementById('clubSelector');
+        selector.innerHTML = '<option value="">-- Choose a Club --</option>';
+
+        const categories = ['Technical', 'Cultural'];
+        for (let cat of categories) {
+            try {
+                // Using absolute URL with API_BASE to avoid pathing errors
+                const res = await fetch(`${API_BASE}/api/clubs/category/${cat}`);
+                
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                
+                const clubs = await res.json();
+                
+                // Ensure 'clubs' is an array before processing
+                if (Array.isArray(clubs)) {
+                    clubs.forEach(club => {
+                        clubsCache.push(club);
+                        const opt = document.createElement('option');
+                        // Use the correct Primary Key from your Internal Schema
+                        opt.value = club.id; 
+                        opt.textContent = `${club.club_name} (${cat})`;
+                        selector.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error(`Failed to load ${cat} clubs:`, err);
+            }
+        }
+    }
+
+    function handleClubSwitch() {
+        const selector = document.getElementById('clubSelector');
+        const clubId = selector.value;
+
+        document.getElementById('requestList').textContent = clubId ? 'Loading requests...' : 'Select club...';
+        document.getElementById('postedEventsList').textContent = clubId ? 'Loading events...' : 'Select club...';
+        document.getElementById('activeMembersList').textContent = clubId ? 'Loading members...' : 'Select club...';
+
+        if (clubId) {
+            loadAchievements();
+            loadRequests();
+            loadPostedEvents();
+            loadActiveMembers();
+        }
+    }
+
+    // 2. TAB SWITCHING (Standardized logic)
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        
+        const targetTab = document.getElementById(tab + 'Tab');
+        const targetBtn = document.getElementById('btn' + tab.charAt(0).toUpperCase() + tab.slice(1));
+        
+        if (targetTab) targetTab.style.display = 'block';
+        if (targetBtn) targetBtn.classList.add('active');
+        
+        if(tab === 'member') loadRequests();
+        if(tab === 'event') loadPostedEvents();
+        if(tab === 'member') loadActiveMembers();
+    }
+
+    function addAchievementLine() {
+        const title = document.getElementById('achTitle').value.trim();
+        const year = document.getElementById('achYear').value.trim();
+        const box = document.getElementById('achievements');
+
+        if (!title && !year) return alert("Please enter a title or year.");
+
+        const line = [title, year].filter(Boolean).join(" - ");
+        const current = box.value.trim();
+        box.value = current ? `${current}\n• ${line}` : `• ${line}`;
+
+        document.getElementById('achTitle').value = '';
+        document.getElementById('achYear').value = '';
+    }
+
+    async function loadAchievements() {
+        const clubId = document.getElementById('clubSelector').value;
+        const box = document.getElementById('achievements');
+        if (!clubId) {
+            box.value = '';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/clubs/achievements/${clubId}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to fetch achievements.");
+            box.value = (data.achievement_text || "").trim();
+        } catch (err) {
+            box.value = '';
+            console.error(err);
+        }
+    }
+
+    // 6. SAVE ACHIEVEMENTS (Fixed JSON handling)
+    async function saveAchievements() {
+        const selector = document.getElementById('clubSelector');
+        const clubId = selector.value;
+        
+        if(!clubId) return alert("Please select a club first!");
+
+        const data = {
+            club_id: clubId,
+            achievement_text: document.getElementById('achievements').value.trim()
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/api/clubs/achievements`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            // Handle non-JSON responses to stop "Unexpected token <" error
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Server returned HTML instead of JSON. Check backend routes.");
+            }
+
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Update failed");
+            alert("✅ " + result.message);
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function saveEvent() {
+        const clubId = document.getElementById('clubSelector').value;
+        if (!clubId) return alert("Please select a club first!");
+
+        const event_name = document.getElementById('evName').value.trim();
+        const event_date = document.getElementById('evDate').value;
+        const venue = document.getElementById('evVenue').value.trim();
+        const description = document.getElementById('evDesc').value.trim();
+
+        if (!event_name || !event_date) {
+            return alert("Event name and date are required.");
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/clubs/events/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ club_id: clubId, event_name, event_date, venue, description })
+            });
+
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Failed to schedule event.");
+
+            alert("✅ " + result.message);
+            document.getElementById('evName').value = '';
+            document.getElementById('evDate').value = '';
+            document.getElementById('evVenue').value = '';
+            document.getElementById('evDesc').value = '';
+
+            loadPostedEvents();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function loadPostedEvents() {
+        const clubId = document.getElementById('clubSelector').value;
+        const list = document.getElementById('postedEventsList');
+        if (!clubId) {
+            list.textContent = 'Select club...';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/clubs/events/${clubId}`);
+            const events = await res.json();
+            if (!res.ok) throw new Error(events.error || "Failed to fetch events.");
+
+            if (!Array.isArray(events) || events.length === 0) {
+                list.textContent = 'No events scheduled yet.';
+                return;
+            }
+
+            list.innerHTML = events.map(e => `
+                <div class="list-item">
+                    <div>
+                        <strong>${e.event_name}</strong><br>
+                        <small>📍 ${e.venue || 'TBA'} | 🗓️ ${new Date(e.event_date).toLocaleDateString()}</small>
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.textContent = 'Failed to load events.';
+            console.error(err);
+        }
+    }
+
+    async function loadRequests() {
+        const clubId = document.getElementById('clubSelector').value;
+        const list = document.getElementById('requestList');
+        if (!clubId) {
+            list.textContent = 'Select club...';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/memberships/pending/${clubId}`);
+            const requests = await res.json();
+            if (!res.ok) throw new Error(requests.error || "Failed to fetch requests.");
+
+            if (!Array.isArray(requests) || requests.length === 0) {
+                list.textContent = 'No pending applications.';
+                return;
+            }
+
+            list.innerHTML = requests.map(r => `
+                <div class="list-item">
+                    <div>
+                        <strong>${r.username}</strong><br>
+                        <small>Applied: ${r.joined_date ? new Date(r.joined_date).toLocaleDateString() : 'N/A'}</small>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="save-btn" style="margin:0; padding:8px 12px; background:#22c55e;" onclick="updateMembershipStatus(${r.membership_id}, 'Active')">Approve</button>
+                        <button class="save-btn" style="margin:0; padding:8px 12px; background:#ef4444;" onclick="updateMembershipStatus(${r.membership_id}, 'Rejected')">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.textContent = 'Failed to load requests.';
+            console.error(err);
+        }
+    }
+
+    async function loadActiveMembers() {
+        const clubId = document.getElementById('clubSelector').value;
+        const list = document.getElementById('activeMembersList');
+
+        if (!clubId) {
+            list.textContent = 'Select club...';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/memberships/active/${clubId}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to fetch members.");
+
+            if (!Array.isArray(data) || data.length === 0) {
+                list.textContent = 'No active members yet.';
+                return;
+            }
+
+            list.innerHTML = data.map(m => `
+                <div class="list-item">
+                    <div>
+                        <strong>${m.username}</strong><br>
+                        <small>Email: ${m.email || 'N/A'} | Phone: ${m.phone || 'N/A'}</small><br>
+                        <small>Joined: ${m.joined_date ? new Date(m.joined_date).toLocaleDateString() : 'N/A'}</small>
+                    </div>
+                    <div>
+                        <button class="save-btn" style="margin:0; padding:8px 12px; background:#ef4444;" onclick="removeMember(${m.membership_id})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            list.textContent = 'Failed to load members.';
+            console.error(err);
+        }
+    }
+
+    async function removeMember(membershipId) {
+        if (!confirm("Remove this student from the club?")) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/memberships/remove/${membershipId}`, {
+                method: "DELETE"
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Remove failed.");
+            alert("✅ " + result.message);
+            loadActiveMembers();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function updateMembershipStatus(membershipId, newStatus) {
+        try {
+            const res = await fetch(`${API_BASE}/api/memberships/update-status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ membership_id: membershipId, new_status: newStatus })
+            });
+
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Status update failed.");
+            alert("✅ " + result.message);
+            loadRequests();
+            loadActiveMembers();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    // Initialize dropdown on page load
+    window.onload = () => {
+        populateClubs();
+    };
+</script>
+</body>
+</html>

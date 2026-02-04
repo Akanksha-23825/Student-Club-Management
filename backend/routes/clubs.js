@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-// GET CLUBS BY CATEGORY (for cultural/technical pages)
+// 1. GET CLUBS BY CATEGORY
 router.get("/category/:category", (req, res) => {
     const category = req.params.category;
     const sql = `
@@ -12,116 +12,97 @@ router.get("/category/:category", (req, res) => {
         WHERE LOWER(c.category) = LOWER(?)`;
 
     db.query(sql, [category], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: "Database query failed" });
         res.json(results);
     });
 });
 
-// GET EVENTS BY CLUB ID (for modal)
+// 2. GET EVENTS BY CLUB ID
 router.get("/events/:clubId", (req, res) => {
     const clubId = req.params.clubId;
-    const sql = `
-        SELECT event_name, venue, event_date
-        FROM events
-        WHERE club_id = ?
-        ORDER BY event_date ASC`;
-
+    const sql = `SELECT event_name, venue, event_date FROM events WHERE club_id = ? ORDER BY event_date ASC`;
     db.query(sql, [clubId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: "Event fetch failed" });
         res.json(results);
     });
 });
 
-// ADD EVENT (from faculty dashboard)
+// 3. GET ACHIEVEMENTS BY CLUB ID
+router.get("/achievements/:clubId", (req, res) => {
+    const clubId = req.params.clubId;
+    const sql = `SELECT achievement_text FROM club_achievements WHERE id = ?`;
+    db.query(sql, [clubId], (err, results) => {
+        if (err) return res.status(500).json({ error: "Achievement fetch failed" });
+        if (results.length === 0) return res.json({ achievement_text: "" });
+        res.json(results[0]);
+    });
+});
+
+// 4. POST NEW EVENT (Fixed: Added this missing route to stop the JSON error)
 router.post("/events/add", (req, res) => {
     const { club_id, event_name, event_date, venue, description } = req.body;
-    if (!club_id || !event_name || !event_date || !venue) {
-        return res.status(400).json({ error: "Missing required event fields" });
+    if (!club_id || !event_name || !event_date) {
+        return res.status(400).json({ error: "Required event fields are missing." });
     }
 
-    const sql = `
-        INSERT INTO events (club_id, event_name, event_date, venue, description)
-        VALUES (?, ?, ?, ?, ?)`;
-
-    db.query(sql, [club_id, event_name, event_date, venue, description || ""], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+    const sql = `INSERT INTO events (club_id, event_name, event_date, venue, description) VALUES (?, ?, ?, ?, ?)`;
+    db.query(sql, [club_id, event_name, event_date, venue, description], (err, result) => {
+        if (err) return res.status(500).json({ error: "Database insertion failed." });
         res.json({ message: "Event scheduled successfully!" });
     });
 });
 
-// UPDATE ACHIEVEMENTS ONLY (does not overwrite club details)
+// 5. UPDATE ACHIEVEMENTS (Atomic Upsert)
 router.post("/achievements", (req, res) => {
     const { club_id, achievement_text } = req.body;
     if (!club_id) return res.status(400).json({ error: "club_id is required" });
 
-    const selectSql = "SELECT achievement_text FROM club_achievements WHERE id = ?";
-    db.query(selectSql, [club_id], (selErr, rows) => {
-        if (selErr) return res.status(500).json({ error: selErr.message });
-
-        const incoming = (achievement_text || "").trim();
-        const existing = rows.length > 0 ? (rows[0].achievement_text || "").trim() : "";
-        const combined = existing && incoming ? `${existing}\n${incoming}` : (existing || incoming);
-
-        if (rows.length === 0) {
-            const insertSql = `
-                INSERT INTO club_achievements (id, achievement_text)
-                VALUES (?, ?)`;
-            return db.query(insertSql, [club_id, combined], (insErr) => {
-                if (insErr) return res.status(500).json({ error: insErr.message });
-                res.json({ message: "Achievements saved successfully!" });
-            });
-        }
-
-        const updateSql = `
-            UPDATE club_achievements
-            SET achievement_text = ?
-            WHERE id = ?`;
-        db.query(updateSql, [combined, club_id], (updErr) => {
-            if (updErr) return res.status(500).json({ error: updErr.message });
-            res.json({ message: "Achievements updated successfully!" });
-        });
+    const sql = `
+        INSERT INTO club_achievements (id, achievement_text) 
+        VALUES (?, ?) 
+        ON DUPLICATE KEY UPDATE achievement_text = VALUES(achievement_text)`;
+            
+    db.query(sql, [club_id, achievement_text.trim()], (err) => {
+        if (err) return res.status(500).json({ error: "Upsert failed" });
+        res.json({ message: "Achievements updated successfully!" });
     });
 });
 
-// ADD/UPDATE CLUB (Synchronize clubs, achievements, contacts)
+// 6. ADMIN: CREATE CLUB (Atomic insert across related tables)
 router.post("/manage", (req, res) => {
     const { club_name, category, description, achievement_text, head_name, email, phone } = req.body;
+    if (!club_name || !category || !description) {
+        return res.status(400).json({ error: "club_name, category, and description are required" });
+    }
 
-    db.beginTransaction((err) => {
-        if (err) return res.status(500).json({ error: "Transaction failed to start" });
+    db.beginTransaction(err => {
+        if (err) return res.status(500).json({ error: "Failed to start transaction" });
 
-        const sqlClubs = `
-            INSERT INTO clubs (club_name, category, description)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE category = VALUES(category), description = VALUES(description)`;
+        const insertClubSql = `INSERT INTO clubs (club_name, category, description) VALUES (?, ?, ?)`;
+        db.query(insertClubSql, [club_name, category, description], (err, result) => {
+            if (err) {
+                return db.rollback(() => res.status(500).json({ error: "Club creation failed" }));
+            }
 
-        db.query(sqlClubs, [club_name, category, description], (err1) => {
-            if (err1) return db.rollback(() => res.status(500).json({ error: "Clubs table update failed" }));
+            const clubId = result.insertId;
+            const insertAchSql = `INSERT INTO club_achievements (id, achievement_text) VALUES (?, ?)`;
+            const insertContactSql = `INSERT INTO club_contacts (id, head_name, email, phone) VALUES (?, ?, ?, ?)`;
 
-            db.query("SELECT id FROM clubs WHERE club_name = ?", [club_name], (err2, rows) => {
-                if (err2 || rows.length === 0) return db.rollback(() => res.status(500).json({ error: "ID fetch failed" }));
-                const finalId = rows[0].id;
+            db.query(insertAchSql, [clubId, achievement_text || "Milestones coming soon!"], (err) => {
+                if (err) {
+                    return db.rollback(() => res.status(500).json({ error: "Achievement init failed" }));
+                }
 
-                const sqlAchieve = `
-                    INSERT INTO club_achievements (id, club_name, achievement_text)
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE achievement_text = VALUES(achievement_text)`;
+                db.query(insertContactSql, [clubId, head_name || "TBD", email || "TBD", phone || "TBD"], (err) => {
+                    if (err) {
+                        return db.rollback(() => res.status(500).json({ error: "Contact init failed" }));
+                    }
 
-                db.query(sqlAchieve, [finalId, club_name, achievement_text || ""], (err3) => {
-                    if (err3) return db.rollback(() => res.status(500).json({ error: "Achievement table update failed" }));
-
-                    const sqlContacts = `
-                        INSERT INTO club_contacts (id, club_name, head_name, email, phone)
-                        VALUES (?, ?, ?, ?, ?)
-                        ON DUPLICATE KEY UPDATE head_name = VALUES(head_name), email = VALUES(email), phone = VALUES(phone)`;
-
-                    db.query(sqlContacts, [finalId, club_name, head_name, email, phone], (err4) => {
-                        if (err4) return db.rollback(() => res.status(500).json({ error: "Contacts table update failed" }));
-
-                        db.commit((errCommit) => {
-                            if (errCommit) return db.rollback(() => res.status(500).json({ error: "Commit failed" }));
-                            res.json({ message: "Club successfully updated across all tables atomically!" });
-                        });
+                    db.commit(err => {
+                        if (err) {
+                            return db.rollback(() => res.status(500).json({ error: "Commit failed" }));
+                        }
+                        res.json({ message: "Club created successfully!" });
                     });
                 });
             });
@@ -129,40 +110,51 @@ router.post("/manage", (req, res) => {
     });
 });
 
-// DELETE CLUB (CASCADE CLEANUP)
-router.delete("/:name", (req, res) => {
-    const clubName = req.params.name;
+// 7. ADMIN: DELETE CLUB BY NAME (safe delete if no FK cascade)
+router.delete("/:clubName", (req, res) => {
+    const { clubName } = req.params;
+    if (!clubName) return res.status(400).json({ error: "clubName is required" });
 
-    db.beginTransaction((err) => {
-        if (err) return res.status(500).json({ error: "Transaction error" });
+    db.beginTransaction(err => {
+        if (err) return res.status(500).json({ error: "Failed to start transaction" });
 
-        // Get ID first to delete child records
-        db.query("SELECT id FROM clubs WHERE club_name = ?", [clubName], (err, rows) => {
-            if (err || rows.length === 0) return db.rollback(() => res.status(404).json({ error: "Club not found" }));
-            const clubId = rows[0].id;
+        const findSql = `SELECT id FROM clubs WHERE club_name = ?`;
+        db.query(findSql, [clubName], (err, results) => {
+            if (err) {
+                return db.rollback(() => res.status(500).json({ error: "Lookup failed" }));
+            }
+            if (results.length === 0) {
+                return db.rollback(() => res.status(404).json({ error: "Club not found" }));
+            }
 
-            const deleteQueries = [
-                "DELETE FROM events WHERE club_id = ?",
-                "DELETE FROM memberships WHERE club_id = ?",
-                "DELETE FROM club_achievements WHERE id = ?",
-                "DELETE FROM club_contacts WHERE id = ?"
-            ];
+            const clubId = results[0].id;
+            const deleteMembersSql = `DELETE FROM memberships WHERE club_id = ?`;
+            const deleteEventsSql = `DELETE FROM events WHERE club_id = ?`;
+            const deleteAchSql = `DELETE FROM club_achievements WHERE id = ?`;
+            const deleteContactsSql = `DELETE FROM club_contacts WHERE id = ?`;
+            const deleteInterestsSql = `DELETE FROM club_interests WHERE club_name = ?`;
+            const deleteClubSql = `DELETE FROM clubs WHERE id = ?`;
 
-            let completed = 0;
-            deleteQueries.forEach(sql => {
-                db.query(sql, [clubId], (qErr) => {
-                    if (qErr) return db.rollback(() => res.status(500).json({ error: "Cleanup failed" }));
-                    completed++;
-
-                    if (completed === deleteQueries.length) {
-                        db.query("DELETE FROM clubs WHERE id = ?", [clubId], (finalErr) => {
-                            if (finalErr) return db.rollback(() => res.status(500).json({ error: "Final delete failed" }));
-                            db.commit((cErr) => {
-                                if (cErr) return db.rollback(() => res.status(500).json({ error: "Commit failed" }));
-                                res.json({ message: "Club deleted successfully." });
+            db.query(deleteMembersSql, [clubId], (err) => {
+                if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete memberships" }));
+                db.query(deleteEventsSql, [clubId], (err) => {
+                    if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete events" }));
+                    db.query(deleteAchSql, [clubId], (err) => {
+                        if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete achievements" }));
+                        db.query(deleteContactsSql, [clubId], (err) => {
+                            if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete contacts" }));
+                            db.query(deleteInterestsSql, [clubName], (err) => {
+                                if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete interests" }));
+                                db.query(deleteClubSql, [clubId], (err) => {
+                                    if (err) return db.rollback(() => res.status(500).json({ error: "Failed to delete club" }));
+                                    db.commit(err => {
+                                        if (err) return db.rollback(() => res.status(500).json({ error: "Commit failed" }));
+                                        res.json({ message: "Club deleted successfully." });
+                                    });
+                                });
                             });
                         });
-                    }
+                    });
                 });
             });
         });

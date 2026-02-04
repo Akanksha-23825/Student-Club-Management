@@ -3,18 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Club Chatbot | RVCE</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    :root {
-      --primary-color: #6c63ff;
-      --bg-color: #f0f2f5;
-      --bot-bubble: #ffffff;
-      --user-bubble: #6c63ff;
-    }
-
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-color);
+      background: transparent;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,29 +17,31 @@
     .chat-container {
       width: 500px;
       height: 600px;
-      background: white;
+      background: var(--card);
       border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-2);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.08);
     }
 
     .chat-header {
-      background: var(--primary-color);
+      background: linear-gradient(120deg, var(--brand), var(--brand-2));
       color: white;
       padding: 20px;
       text-align: center;
       font-size: 20px;
       font-weight: bold;
       letter-spacing: 1px;
+      font-family: var(--font-heading);
     }
 
     .chat-box {
       flex: 1;
       padding: 20px;
       overflow-y: auto;
-      background: #f9f9f9;
+      background: #f8fafc;
       display: flex;
       flex-direction: column;
       gap: 15px;
@@ -64,15 +59,15 @@
 
     .bot {
       align-self: flex-start;
-      background: var(--bot-bubble);
-      color: #333;
-      border: 1px solid #ddd;
+      background: var(--white);
+      color: var(--ink-2);
+      border: 1px solid rgba(15, 23, 42, 0.08);
       border-bottom-left-radius: 2px;
     }
 
     .user {
       align-self: flex-end;
-      background: var(--user-bubble);
+      background: var(--brand);
       color: white;
       border-bottom-right-radius: 2px;
     }
@@ -80,21 +75,22 @@
     .chat-input {
       display: flex;
       padding: 15px;
-      background: white;
-      border-top: 1px solid #eee;
+      background: var(--white);
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
     }
 
     .chat-input input {
       flex: 1;
       padding: 12px 15px;
-      border: 1px solid #ddd;
+      border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 25px;
       outline: none;
       font-size: 15px;
+      background: #f8fafc;
     }
 
     .chat-input button {
-      background: var(--primary-color);
+      background: var(--brand);
       color: white;
       border: none;
       padding: 0 20px;
@@ -106,7 +102,7 @@
     }
 
     .chat-input button:hover {
-      background: #554ee8;
+      background: var(--brand-dark);
     }
 
     /* Scrollbar Styling */
@@ -117,7 +113,7 @@
 <body>
 
 <div class="chat-container">
-  <div class="chat-header">🤖 RVCE Club Assistant</div>
+  <div class="chat-header">&#129302; RVCE Club Assistant</div>
 
   <div id="chatBox" class="chat-box">
     <div class="message bot">
@@ -150,10 +146,11 @@
     addMessage(msg, "user");
     input.value = "";
 
+    const username = localStorage.getItem("username");
     fetch("http://localhost:3000/api/chatbot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg })
+      body: JSON.stringify({ message: msg, username })
     })
     .then(res => res.json())
     .then(data => {
@@ -201,3 +198,4 @@
 
 </body>
 </html>
+

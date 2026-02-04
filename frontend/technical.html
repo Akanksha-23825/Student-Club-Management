@@ -1,210 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Technical Clubs | RVCE</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Matching the Cultural styles but with a tech color if desired */
-    .club-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; }
-
-    .club-card {
-      position: relative;
-      width: 320px;
-      height: 280px;
-      background: white;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .tech-card h2 { color: #2d3436; }
-
-    .hover-overlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(45, 52, 54, 0.98); /* Darker Tech Theme */
-      color: white;
-      padding: 25px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      text-align: left;
-      transform: translateY(100%);
-      transition: transform 0.4s ease-in-out;
-      overflow-y: auto;
-    }
-
-    .club-card:hover .hover-overlay { transform: translateY(0); }
-    .hover-overlay h3 { color: #00d2ff; border-bottom: 1px solid #00d2ff; padding-bottom: 5px; }
-    .achievement-text { font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
-
-    /* Modal Styling */
-.modal {
-  display: none; 
-  position: fixed;
-  z-index: 1000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.7);
-  backdrop-filter: blur(5px);
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 5% auto;
-  padding: 30px;
-  border-radius: 20px;
-  width: 70%;
-  max-width: 800px;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-}
-
-.close-button {
-  position: absolute;
-  right: 20px; top: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #888;
-}
-
-.modal-header-title {
-  color: #6c63ff;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.achievement-full-list {
-  line-height: 1.8;
-  white-space: pre-wrap;
-  color: #333;
-}
-
-/* Modal Background */
-.modal {
-  display: none; 
-  position: fixed;
-  z-index: 2000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.8);
-  backdrop-filter: blur(4px);
-}
-
-/* Modal Box */
-.modal-content {
-  background-color: #fff;
-  margin: 5% auto;
-  padding: 40px;
-  border-radius: 20px;
-  width: 80%;
-  max-width: 900px;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-}
-
-/* Close Button */
-.close-button {
-  position: absolute;
-  right: 25px; top: 20px;
-  font-size: 35px;
-  color: #aaa;
-  cursor: pointer;
-}
-
-.close-button:hover { color: #333; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Technical Clubs | RVCE</title> <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #0ea5e9; /* FIXED: Blue color for Technical */
+            --brand-2: #22c55e;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --shadow-1: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-2: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; }
+        .page-header {
+            text-align: center; padding: 80px 20px; color: white; margin-bottom: 50px;
+            background: linear-gradient(135deg, #0f172a 0%, var(--brand) 60%, var(--brand-2) 120%);
+        }
+        .club-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; padding: 0 20px 80px; }
+        .club-card {
+            background: var(--card); border-radius: 20px; padding: 40px; box-shadow: var(--shadow-1);
+            cursor: pointer; height: 280px; display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden; transition: 0.3s ease;
+        }
+        .club-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-2); border: 1px solid var(--brand); }
+        .hover-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 54px;
+            background: linear-gradient(120deg, var(--brand) 0%, var(--brand-2) 120%);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 600; transform: translateY(100%); transition: 0.3s ease;
+        }
+        .club-card:hover .hover-overlay { transform: translateY(0); }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); }
+        .modal-content { background: var(--card); margin: 5vh auto; padding: 50px; border-radius: 24px; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; position: relative; }
+    </style>
 </head>
-
 <body>
+    <header class="page-header">
+        <h1>💻 Technical Clubs</h1> <p>Innovation, Engineering Excellence & Future Tech at RVCE</p>
+    </header>
 
-<header class="page-header tech-header">
-  <h1>💻 Technical Clubs</h1>
-  <p>Coding, Robotics, AI, Innovation & Engineering</p>
-</header>
+    <div id="clubContainer" class="club-container"></div>
 
-<div id="clubContainer" class="club-container"></div>
-<script>
-let allClubsData = []; // Global variable to store fetched data for the modal
-
-fetch("http://localhost:3000/api/clubs/cultural") // Change to /technical for technical.html
-  .then(response => response.json())
-  .then(data => {
-    allClubsData = data; // Store the results globally
-    const container = document.getElementById("clubContainer");
-    container.innerHTML = "";
-
-    data.forEach((club, index) => {
-      container.innerHTML += `
-        <div class="club-card" onclick="openModal(${index})">
-          <div class="card-content">
-            <h2>${club.club_name}</h2>
-            <p>${club.description ? club.description.substring(0, 80) + '...' : 'Click to learn more'}</p>
-          </div>
-          
-          <div class="hover-overlay">
-            <span>Click to View Achievements 🏆</span>
-          </div>
+    <div id="clubModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="position: absolute; right: 30px; top: 20px; font-size: 32px; cursor: pointer;">&times;</span>
+            <div id="modalBody"></div>
+            <div id="modalFooter" style="margin-top: 30px; display: flex; justify-content: flex-end;"></div>
         </div>
-      `;
-    });
-  })
-  .catch(err => console.error("Error loading clubs:", err));
-
-// Function to open the modal and show full details
-function openModal(index) {
-  const club = allClubsData[index];
-  const modal = document.getElementById("clubModal");
-  const modalBody = document.getElementById("modalBody");
-
-  modalBody.innerHTML = `
-    <h1 style="color: #6c63ff; border-bottom: 2px solid #eee; padding-bottom: 10px;">${club.club_name}</h1>
-    <p><strong>Category:</strong> ${club.category}</p>
-    <p><strong>Description:</strong> ${club.description}</p>
-    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
-    <h3>🏆 Notable Achievements & Milestones</h3>
-    <div style="white-space: pre-wrap; line-height: 1.6; color: #333;">
-      ${club.achievement_text || "No achievements listed yet."}
     </div>
-  `;
-  
-  modal.style.display = "block";
-  document.body.style.overflow = "hidden"; // Prevent background scrolling
-}
 
-// Function to close the modal
-function closeModal() {
-  document.getElementById("clubModal").style.display = "none";
-  document.body.style.overflow = "auto";
-}
+    <script>
+        let allClubsData = [];
+        const role = localStorage.getItem("role");
+        const currentUsername = localStorage.getItem("username");
 
-// Close modal if user clicks the backdrop
-window.onclick = function(event) {
-  const modal = document.getElementById("clubModal");
-  if (event.target == modal) {
-    closeModal();
-  }
-}
-</script>
-<div id="clubModal" class="modal">
-  <div class="modal-content">
-    <span class="close-button" onclick="closeModal()">&times;</span>
-    <div id="modalBody">
-      </div>
-  </div>
-</div>
+        // The logic below automatically fetches "Technical" clubs because we fixed the <title>
+        const categoryName = document.title.includes("Cultural") ? "Cultural" : "Technical";
+        
+        fetch(`/api/clubs/category/${categoryName}`)
+            .then(res => res.json())
+            .then(data => {
+                allClubsData = data;
+                const container = document.getElementById("clubContainer");
+                if (data.length === 0) {
+                    container.innerHTML = "<h3>No clubs found in this category.</h3>";
+                    return;
+                }
+                container.innerHTML = data.map((club, index) => `
+                    <div class="club-card" onclick="openModal(${index})">
+                        <div>
+                            <h2>${club.club_name}</h2>
+                            <p style="color: #64748b; margin-top: 10px; font-size: 0.95rem;">
+                                ${club.description || 'Explore our club initiatives.'}
+                            </p>
+                        </div>
+                        <div class="hover-overlay">View Achievements & Events 🏆</div>
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                document.getElementById("clubContainer").innerHTML = "<h3>Database Error. Check Server!</h3>";
+            });
+
+        async function openModal(index) {
+            const club = allClubsData[index];
+            const eventRes = await fetch(`/api/clubs/events/${club.id}`);
+            const events = await eventRes.json();
+
+            let rawText = club.achievement_text || "";
+            const isPlaceholder = rawText.toLowerCase().includes("milestones coming soon") || 
+                                  rawText.toLowerCase().includes("winning moments");
+
+            let achievementHTML = (rawText && !isPlaceholder)
+                ? rawText.split('\n').map(line => `<li>${line.trim()}</li>`).join('')
+                : '<li>Winning moments will be updated shortly!</li>';
+
+            document.getElementById("modalBody").innerHTML = `
+                <h1 style="color: var(--ink); font-weight: 800;">${club.club_name}</h1>
+                <p style="margin: 20px 0; color: #64748b; line-height: 1.6;">${club.description || 'N/A'}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border-left: 6px solid var(--brand);">
+                        <h3>🏆 Achievements</h3>
+                        <ul style="font-size: 14px; padding-left: 20px; line-height: 1.7;">${achievementHTML}</ul>
+                    </div>
+                    <div style="background: #fff7ed; padding: 25px; border-radius: 20px; border-left: 6px solid var(--brand-2);">
+                        <h3>📅 Upcoming Events</h3>
+                        <div style="font-size: 14px;">
+                            ${events.length > 0 ? events.map(e => `
+                                <div style="margin-bottom: 12px; border-bottom: 1px solid #fed7aa; padding-bottom: 8px;">
+                                    <strong>${e.event_name}</strong><br>
+                                    <small>📍 ${e.venue} | 🗓️ ${new Date(e.event_date).toLocaleDateString()}</small>
+                                </div>`).join('') : '<p>No events scheduled.</p>'}
+                        </div>
+                    </div>
+                </div>`;
+            
+            document.getElementById("modalFooter").innerHTML = (role === "student") 
+                ? `<button onclick="applyToClub(${club.id})" style="background: var(--brand); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; cursor: pointer;">Apply to Join</button>`
+                : `<p style="font-size: 13px; color: #64748b;">Logged in as: ${role}</p>`;
+
+            document.getElementById("clubModal").style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() { 
+            document.getElementById("clubModal").style.display = "none"; 
+            document.body.style.overflow = "auto"; 
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById("clubModal")) closeModal();
+        }
+
+        async function applyToClub(clubId) {
+            if (!currentUsername) return alert("Please login first!");
+            const email = prompt("Enter your email:");
+            if (!email) return alert("Email is required.");
+            const phone = prompt("Enter your phone number:");
+            if (!phone) return alert("Phone number is required.");
+            const res = await fetch('/api/memberships/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUsername, club_id: clubId, email, phone })
+            });
+            const result = await res.json();
+            alert(result.message || result.error);
+        }
+    </script>
 </body>
 </html>

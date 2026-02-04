@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Memberships | RVCE Clubs</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background-color: var(--bg); }
+        .membership-container { max-width: 900px; margin: 60px auto; padding: 0 20px 40px; }
+        .membership-card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-1);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+        .status-text { font-weight: 700; }
+        .status-active { color: #16a34a; }
+        .status-pending { color: #ca8a04; }
+        .status-rejected { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="images/images.png" alt="RVCE Logo" class="nav-logo">
+            <span class="logo-text">RVCE Clubs</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cultural.html">Cultural</a></li>
+            <li><a href="technical.html">Technical</a></li>
+            <li><a class="login-btn" href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="membership-container">
+        <h1 style="margin-bottom: 10px;">Your Club Applications</h1>
+        <p style="color: #64748b; margin-bottom: 24px;">Track where your applications stand.</p>
+        <div id="membershipList"></div>
+    </div>
+
+    <a href="chatbot.html" class="chatbot-fab" aria-label="Open Chatbot" title="Open Chatbot">&#129302;</a>
+
+    <script>
+        const username = localStorage.getItem("username");
+
+        if (!username) {
+            alert("Please login to view your memberships.");
+            window.location.href = "login.html";
+        }
+
+        fetch(`/api/memberships/my-clubs/${username}`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById("membershipList");
+                if (data.length === 0) {
+                    container.innerHTML = "<p>You haven't applied to any clubs yet.</p>";
+                    return;
+                }
+                container.innerHTML = data.map(m => `
+                    <div class="membership-card">
+                        <h3 style="color: var(--ink);">${m.club_name}</h3>
+                        <p>Status: <span class="status-text status-${m.status.toLowerCase()}">${m.status}</span></p>
+                        <p style="color: #64748b;">Applied on: ${new Date(m.joined_date).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            })
+            .catch(() => {
+                document.getElementById("membershipList").innerHTML = "Error loading memberships.";
+            });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
+

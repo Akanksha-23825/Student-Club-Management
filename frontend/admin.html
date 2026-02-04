@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Admin | RVCE Club Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
+        .admin-box { max-width: 700px; margin: 50px auto; padding: 40px; background: white; border-radius: 24px; box-shadow: var(--shadow-2); border: 1px solid rgba(15, 23, 42, 0.08); }
+        h2 { color: var(--ink); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 25px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #64748b; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; }
+        
+        .save-btn { width: 100%; background: var(--brand); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .save-btn:hover { background: #0284c7; transform: translateY(-2px); }
+        
+        .danger-zone { margin-top: 50px; padding: 30px; background: #fff1f2; border: 2px dashed #fecaca; border-radius: 16px; }
+        .delete-btn { width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 15px; }
+        .delete-btn:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="admin-box">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="images/images.png" alt="Logo" style="height: 50px;">
+            <h1>🛠️ System Administration</h1>
+        </div>
+
+        <h2>➕ Register New Club</h2>
+        <div class="form-group">
+            <label>Club Name</label>
+            <input type="text" id="newClubName" placeholder="e.g., Robotics Club">
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <select id="newClubCat">
+                <option value="Technical">Technical</option>
+                <option value="Cultural">Cultural</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Short Description</label>
+            <textarea id="newClubDesc" rows="3" placeholder="What does this club do?"></textarea>
+        </div>
+        <button class="save-btn" onclick="addClub()">Initialize Club Schema</button>
+
+        <div class="danger-zone">
+            <h2 style="color: #991b1b; border-color: #fecaca;">🗑️ Permanent Deletion</h2>
+            <p style="font-size: 13px; color: #b91c1c;">Warning: This action will trigger a cascade delete in the database. All events, achievements, and student memberships for this club will be lost forever.</p>
+            <input type="text" id="deleteClubName" placeholder="Type Club Name exactly to confirm">
+            <button class="delete-btn" onclick="deleteClub()">Remove from System</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="login.html" style="color: #64748b; text-decoration: none; font-size: 14px;">← Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Implements Atomic Update across 3 tables
+        async function addClub() {
+            const club_name = document.getElementById('newClubName').value.trim();
+            const category = document.getElementById('newClubCat').value;
+            const description = document.getElementById('newClubDesc').value.trim();
+
+            if (!club_name || !description) return alert("Please fill all fields.");
+
+            // Constructing full body to satisfy backend '/manage' route
+            const data = {
+                club_name,
+                category,
+                description,
+                achievement_text: "Milestones coming soon!", // Initial placeholder
+                head_name: "TBD",
+                email: "TBD",
+                phone: "TBD"
+            };
+
+            try {
+                const res = await fetch('/api/clubs/manage', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                alert(result.message || result.error);
+                if (!result.error) location.reload();
+            } catch (err) {
+                alert("Failed to connect to backend server.");
+            }
+        }
+
+        // Implements Club Deletion
+        async function deleteClub() {
+            const name = document.getElementById('deleteClubName').value.trim();
+            if (!name) return alert("Please enter a club name.");
+
+            if (!confirm(`Are you absolutely sure you want to delete ${name}? This cannot be undone.`)) return;
+
+            try {
+                const res = await fetch(`/api/clubs/${name}`, { 
+                    method: 'DELETE' 
+                });
+                const result = await res.json();
+                alert(result.message || result.error);
+                if (!result.error) location.reload();
+            } catch (err) {
+                alert("Error during deletion process.");
+            }
+        }
+    </script>
+</body>
+</html>

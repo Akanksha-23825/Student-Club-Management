@@ -1,15 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | RVCE Clubs</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body style="font-family:Arial; text-align:center; padding-top:50px;">
-    <h1>Welcome to Student Club Management System</h1>
-    <p>Select an option:</p>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="images/images.png" alt="RVCE Logo" class="nav-logo">
+            <span class="logo-text">RVCE Clubs</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="recommend.html">Find My Club</a></li>
+            <li><a class="login-btn" href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
 
-    <a href="cultural.html">Cultural Clubs</a> |
-    <a href="technical.html">Technical Clubs</a> |
-    <a href="recommend.html">Club Recommendation</a> |
-    <a href="chatbot.html">Chatbot</a>
+    <section class="hero" style="min-height: 45vh;">
+        <h1>Student Club Hub</h1>
+        <p>Quick access to cultural groups, technical teams, recommendations, and the club assistant.</p>
+    </section>
+
+    <section class="club-container">
+        <a class="club-card" href="cultural.html">
+            <div>
+                <h2>Cultural Clubs</h2>
+                <p style="color: #64748b; margin-top: 10px;">Music, dance, theatre, and creative arts communities.</p>
+            </div>
+        </a>
+        <a class="club-card" href="technical.html">
+            <div>
+                <h2>Technical Clubs</h2>
+                <p style="color: #64748b; margin-top: 10px;">Robotics, AI, coding, and innovation labs.</p>
+            </div>
+        </a>
+        <a class="club-card" href="recommend.html">
+            <div>
+                <h2>Find My Club</h2>
+                <p style="color: #64748b; margin-top: 10px;">Get personalized club recommendations in minutes.</p>
+            </div>
+        </a>
+        <a class="club-card" href="chatbot.html">
+            <div>
+                <h2>Club Assistant</h2>
+                <p style="color: #64748b; margin-top: 10px;">Ask questions and explore achievements instantly.</p>
+            </div>
+        </a>
+    </section>
+
+    <a href="chatbot.html" class="chatbot-fab" aria-label="Open Chatbot" title="Open Chatbot">&#129302;</a>
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    </script>
 </body>
 </html>
+

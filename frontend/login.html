@@ -1,124 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login | Student Club Management System</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <title>Login | RVCE Club Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Existing styles maintained ... */
+        body {
+            background:
+                radial-gradient(1200px 600px at 80% -10%, rgba(34, 197, 94, 0.12), transparent 55%),
+                radial-gradient(900px 500px at -10% 20%, rgba(14, 165, 233, 0.14), transparent 55%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .login-box {
-      background: #fff;
-      padding: 30px;
-      width: 350px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      text-align: center;
-    }
+        .auth-container { 
+            width: 420px; 
+            background: var(--card); 
+            padding: 50px; 
+            border-radius: 24px; 
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-2); 
+            text-align: center; 
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .login-box h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 15px;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 10px;
-      background: #667eea;
-      border: none;
-      color: #fff;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .login-box button:hover {
-      background: #5a67d8;
-    }
-
-    .error {
-      color: red;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    .footer-text {
-      margin-top: 15px;
-      font-size: 13px;
-      color: #666;
-    }
-  </style>
+        /* Existing CSS continues ... */
+        #auth-title { color: var(--ink); font-weight: 800; font-size: 28px; margin-bottom: 30px; letter-spacing: -1px; }
+        input, select { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid rgba(15, 23, 42, 0.12); border-radius: 12px; box-sizing: border-box; font-size: 15px; transition: var(--transition); background: #f8fafc; }
+        .btn { width: 100%; background: var(--brand); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 700; transition: var(--transition); margin-top: 20px; box-shadow: 0 10px 24px rgba(14, 165, 233, 0.35); }
+        .toggle-link { margin-top: 25px; display: block; color: var(--brand); cursor: pointer; text-decoration: none; font-size: 14px; font-weight: 600; }
+        label { display: block; text-align: left; font-size: 13px; font-weight: 600; color: #64748b; margin-left: 5px; margin-bottom: -5px; }
+    </style>
 </head>
 <body>
+    <div class="auth-container">
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 10px;">
+            <img src="images/images.png" alt="RVCE Logo" style="height:36px; width:auto; object-fit:contain;">
+            <span style="font-family: var(--font-heading); font-weight:700; color: var(--ink); font-size:20px;">RVCE Clubs</span>
+        </div>
+        <h2 id="auth-title">Welcome Back</h2>
+        <p id="auth-subtitle" style="color:#64748b; font-size:14px; margin:-18px 0 24px;">Sign in to access recommendations, chatbot, and club updates.</p>
+        
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
 
-  <div class="login-box">
-    <h2>Student Login</h2>
+        <div id="signup-only" style="display: none;">
+            <label>Select Your Role</label>
+            <select id="role">
+                <option value="student">Student</option>
+                <option value="faculty">Faculty Advisor</option>
+                <option value="admin">System Admin</option>
+            </select>
+        </div>
 
-    <!-- IMPORTANT: onsubmit -->
-    <form onsubmit="loginUser(event)">
-      <input type="email" id="email" placeholder="College Email" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Login</button>
-    </form>
-
-    <div id="errorMsg" class="error"></div>
-
-    <div class="footer-text">
-      Student Club Management System
+        <button class="btn" onclick="handleAuth()" id="auth-btn">Sign In</button>
+        <span class="toggle-link" onclick="toggleMode()" id="toggle-text">New to the portal? Create an account</span>
+        <p style="margin-top: 14px; color:#94a3b8; font-size:12px;">By continuing, you agree to the campus usage guidelines.</p>
     </div>
-  </div>
 
-  <script>
-    function loginUser(event) {
-      event.preventDefault(); // ⭐ VERY IMPORTANT
+    <script>
+        let isLogin = true;
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const errorMsg = document.getElementById("errorMsg");
-
-      errorMsg.innerText = "";
-
-      fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          // ✅ CONNECTS TO INDEX PAGE
-          window.location.href = "index.html";
-        } else {
-          errorMsg.innerText = "Invalid email or password";
+        function toggleMode() {
+            isLogin = !isLogin;
+            document.getElementById("auth-title").innerText = isLogin ? "Welcome Back" : "Create Account";
+            document.getElementById("auth-btn").innerText = isLogin ? "Sign In" : "Register";
+            document.getElementById("toggle-text").innerText = isLogin ? "New to the portal? Create an account" : "Already have an account? Sign in";
+            const signupOnly = document.getElementById("signup-only");
+            if (signupOnly) signupOnly.style.display = isLogin ? "none" : "block";
+            document.getElementById("auth-subtitle").innerText = isLogin
+                ? "Sign in to access recommendations, chatbot, and club updates."
+                : "Create your account to explore clubs and personalized matches.";
         }
-      })
-      .catch(() => {
-        errorMsg.innerText = "Server error. Please try again.";
-      });
-    }
-  </script>
 
+        function handleAuth() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const role = isLogin ? undefined : document.getElementById("role").value;
+
+            if (!username || !password) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
+
+            fetch(`http://localhost:3000${endpoint}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    if (isLogin) {
+                        // Store session data locally
+                        localStorage.setItem("role", data.role);
+                        localStorage.setItem("username", data.username);
+                        
+                        // ROLE-BASED REDIRECTION
+                        if (data.role === "admin") {
+                            window.location.href = "admin.html"; // Redirect to addition/deletion page
+                        } else if (data.role === "faculty") {
+                            window.location.href = "faculty_dashboard.html";
+                        } else {
+                            window.location.href = "index.html";
+                        }
+                    } else {
+                        alert("Account created! Please sign in.");
+                        toggleMode();
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("Auth Error:", err);
+                alert("Server connection failed. Make sure your backend is running.");
+            });
+        }
+    </script>
 </body>
 </html>
