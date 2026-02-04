@@ -73,8 +73,52 @@
     </div>
 
    <script>
-    // Ensure this matches your node server port exactly
-    const API_BASE = "http://localhost:3000";
+    // Use relative API base so it works after deployment
+    const API_BASE = "";
+
+    const demoClubs = [
+        { id: 1, club_name: "Accelerate", category: "Technical", description: "Innovation club focused on hackathons, bootcamps, and rapid prototyping." },
+        { id: 2, club_name: "ACM RVCE", category: "Technical", description: "Official student body of the Association for Computing Machinery (ACM)." },
+        { id: 3, club_name: "Alaap", category: "Cultural", description: "The official music club of RVCE fostering musical talent across all genres." },
+        { id: 4, club_name: "Anoraniya", category: "Technical", description: "Quantum Technology Club exploring quantum mechanics and advanced computing." },
+        { id: 5, club_name: "Ashwa Racing", category: "Technical", description: "Formula Student team focusing on motorsports innovation and engineering excellence." },
+        { id: 6, club_name: "Astra Robotics", category: "Technical", description: "Robotics research club advancing autonomous systems and AI integration." },
+        { id: 7, club_name: "Bookworm club", category: "Cultural", description: "Clubs for book lovers" },
+        { id: 8, club_name: "CARV English", category: "Cultural", description: "Premier English theatrical troupe fostering communication skills and self-expression." },
+        { id: 9, club_name: "CARV Hindi", category: "Cultural", description: "Hindi Drama Club of RVCE dedicated to social awareness and creative storytelling through theatre." },
+        { id: 10, club_name: "Coding Club", category: "Technical", description: "Promoting campus coding culture, competitive programming, and web development." },
+        { id: 11, club_name: "CubeX", category: "Cultural", description: "Student club dedicated to the art and sport of Speedcubing and Rubik's Cube enthusiasts." },
+        { id: 12, club_name: "DebSoc", category: "Cultural", description: "Debate Society focusing on oratory, critical thinking, and intellectual exchanges." },
+        { id: 13, club_name: "Dhruva", category: "Technical", description: "The official Astrophysics club of RVCE exploring the wonders of the universe." },
+        { id: 14, club_name: "E-Cell", category: "Cultural", description: "Student-driven hub igniting entrepreneurial passion and leadership on campus." },
+        { id: 15, club_name: "Evoke", category: "Cultural", description: "Official fashion club celebrating innovation, individuality, and style on the ramp." },
+        { id: 16, club_name: "F/6.3 Photography", category: "Cultural", description: "Photography community dedicated to capturing moments and telling stories through the lens." },
+        { id: 17, club_name: "Footprints", category: "Cultural", description: "Premier dance club of RVCE with specialized Western, Classical, and Eastern teams." },
+        { id: 19, club_name: "Frequency Club", category: "Technical", description: "Technical innovation hub fostering creativity and cross-domain engineering." },
+        { id: 20, club_name: "GDG RVCE", category: "Technical", description: "Google Developer Groups on Campus focusing on modern software frameworks." },
+        { id: 21, club_name: "Ham Club", category: "Technical", description: "Amateur radio club exploring communication domains and wireless technologies." },
+        { id: 23, club_name: "Kannada CARV", category: "Cultural", description: "Official Kannada theatre club specializing in Center Stage Play, Mad Ads, and Street Play." },
+        { id: 24, club_name: "Project Garuda", category: "Technical", description: "The Super Mileage Club of RVCE building ultra-fuel-efficient vehicles." },
+        { id: 25, club_name: "Project Jatayu", category: "Technical", description: "Student autonomous UAV (drone) team focused on aerial surveillance and automation." },
+        { id: 26, club_name: "RAAG", category: "Cultural", description: "Youth and cultural club organizing Ethnic Day, DJ Nights, and campus spirit events." },
+        { id: 27, club_name: "Rotaract Club", category: "Cultural", description: "Community service and leadership development club affiliated with Rotary International." },
+        { id: 28, club_name: "RV QuizCorp", category: "Cultural", description: "Official quizzing club of RVCE fostering curiosity and intellectual engagement." },
+        { id: 29, club_name: "Sattva", category: "Cultural", description: "Art community for painting, sketching, and creative expression at RVCE." },
+        { id: 30, club_name: "SPARK", category: "Technical", description: "IUCEE Student Chapter dedicated to knowledge sharing and engineering education." },
+        { id: 31, club_name: "Studio Zero", category: "Cultural", description: "Filmmaking club of RVCE for short films, skits, and cinematic event coverage." },
+        { id: 32, club_name: "Team Antariksh", category: "Technical", description: "Student space technology club working on satellite and rocket systems." },
+        { id: 33, club_name: "Team Chimera", category: "Technical", description: "Electric formula student racing team focused on sustainable mobility." },
+        { id: 34, club_name: "Team Chitrak", category: "Technical", description: "Electric motorcycle design and fabrication team pushing the limits of EV tech." },
+        { id: 35, club_name: "Team Helios Racing", category: "Technical", description: "Off-road motorsports engineering team building rugged All-Terrain Vehicles (ATVs)." },
+        { id: 36, club_name: "Team KRUSHI", category: "Technical", description: "Agricultural innovation team creating technology-driven solutions for farmers." },
+        { id: 37, club_name: "TEDxRVCE", category: "Cultural", description: "Independently organized TED event at RVCE focused on ideas that inspire and ignite change." },
+        { id: 38, club_name: "Vyoma", category: "Technical", description: "Aero-design team and NASA Systems Engineering Award winner specializing in UAVs." },
+        { id: 39, club_name: "Women in Cloud", category: "Technical", description: "Socio-technical team empowering women in tech through cloud computing workshops." },
+        { id: 51, club_name: "Movie Club", category: "Cultural", description: "Shows movies" },
+        { id: 52, club_name: "Mechatronics Club", category: "Technical", description: "Mechatronics club" },
+        { id: 53, club_name: "Comickun", category: "Cultural", description: "Comic fans gang" },
+        { id: 54, club_name: "Dance Club", category: "Technical", description: "hellooo" }
+    ];
 
     let clubsCache = [];
 
@@ -84,6 +128,7 @@
         selector.innerHTML = '<option value="">-- Choose a Club --</option>';
 
         const categories = ['Technical', 'Cultural'];
+        let loadedAny = false;
         for (let cat of categories) {
             try {
                 // Using absolute URL with API_BASE to avoid pathing errors
@@ -103,10 +148,20 @@
                         opt.textContent = `${club.club_name} (${cat})`;
                         selector.appendChild(opt);
                     });
+                    if (clubs.length > 0) loadedAny = true;
                 }
             } catch (err) {
                 console.error(`Failed to load ${cat} clubs:`, err);
             }
+        }
+
+        if (!loadedAny) {
+            demoClubs.forEach(club => {
+                const opt = document.createElement('option');
+                opt.value = club.id;
+                opt.textContent = `${club.club_name} (${club.category})`;
+                selector.appendChild(opt);
+            });
         }
     }
 

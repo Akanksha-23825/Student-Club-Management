@@ -52,40 +52,75 @@
     </div>
 
     <script>
+        const demoClubs = [
+            { id: 3, club_name: "Alaap", category: "Cultural", description: "The official music club of RVCE fostering musical talent across all genres." },
+            { id: 7, club_name: "Bookworm club", category: "Cultural", description: "Clubs for book lovers" },
+            { id: 8, club_name: "CARV English", category: "Cultural", description: "Premier English theatrical troupe fostering communication skills and self-expression." },
+            { id: 9, club_name: "CARV Hindi", category: "Cultural", description: "Hindi Drama Club of RVCE dedicated to social awareness and creative storytelling through theatre." },
+            { id: 11, club_name: "CubeX", category: "Cultural", description: "Student club dedicated to the art and sport of Speedcubing and Rubik's Cube enthusiasts." },
+            { id: 12, club_name: "DebSoc", category: "Cultural", description: "Debate Society focusing on oratory, critical thinking, and intellectual exchanges." },
+            { id: 14, club_name: "E-Cell", category: "Cultural", description: "Student-driven hub igniting entrepreneurial passion and leadership on campus." },
+            { id: 15, club_name: "Evoke", category: "Cultural", description: "Official fashion club celebrating innovation, individuality, and style on the ramp." },
+            { id: 16, club_name: "F/6.3 Photography", category: "Cultural", description: "Photography community dedicated to capturing moments and telling stories through the lens." },
+            { id: 17, club_name: "Footprints", category: "Cultural", description: "Premier dance club of RVCE with specialized Western, Classical, and Eastern teams." },
+            { id: 23, club_name: "Kannada CARV", category: "Cultural", description: "Official Kannada theatre club specializing in Center Stage Play, Mad Ads, and Street Play." },
+            { id: 26, club_name: "RAAG", category: "Cultural", description: "Youth and cultural club organizing Ethnic Day, DJ Nights, and campus spirit events." },
+            { id: 27, club_name: "Rotaract Club", category: "Cultural", description: "Community service and leadership development club affiliated with Rotary International." },
+            { id: 28, club_name: "RV QuizCorp", category: "Cultural", description: "Official quizzing club of RVCE fostering curiosity and intellectual engagement." },
+            { id: 29, club_name: "Sattva", category: "Cultural", description: "Art community for painting, sketching, and creative expression at RVCE." },
+            { id: 31, club_name: "Studio Zero", category: "Cultural", description: "Filmmaking club of RVCE for short films, skits, and cinematic event coverage." },
+            { id: 37, club_name: "TEDxRVCE", category: "Cultural", description: "Independently organized TED event at RVCE focused on ideas that inspire and ignite change." },
+            { id: 51, club_name: "Movie Club", category: "Cultural", description: "Shows movies" },
+            { id: 53, club_name: "Comickun", category: "Cultural", description: "Comic fans gang" }
+        ];
+
         let allClubsData = [];
         const role = localStorage.getItem("role");
         const currentUsername = localStorage.getItem("username");
+
+        function renderClubs(data) {
+            allClubsData = data;
+            const container = document.getElementById("clubContainer");
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = "<h3>No clubs found in this category.</h3>";
+                return;
+            }
+            container.innerHTML = data.map((club, index) => `
+                <div class="club-card" onclick="openModal(${index})">
+                    <div>
+                        <h2>${club.club_name}</h2>
+                        <p style="color: #64748b; margin-top: 10px; font-size: 0.95rem;">
+                            ${club.description || 'Explore our club initiatives.'}
+                        </p>
+                    </div>
+                    <div class="hover-overlay">View Achievements & Events 🏆</div>
+                </div>
+            `).join('');
+        }
 
         // Fetch Cultural Category clubs
         fetch(`/api/clubs/category/Cultural`)
             .then(res => res.json())
             .then(data => {
-                allClubsData = data;
-                const container = document.getElementById("clubContainer");
-                if (data.length === 0) {
-                    container.innerHTML = "<h3>No clubs found. Check category case sensitivity in MySQL!</h3>";
-                    return;
+                if (Array.isArray(data) && data.length > 0) {
+                    renderClubs(data);
+                } else {
+                    renderClubs(demoClubs);
                 }
-                container.innerHTML = data.map((club, index) => `
-                    <div class="club-card" onclick="openModal(${index})">
-                        <div>
-                            <h2>${club.club_name}</h2>
-                            <p style="color: #64748b; margin-top: 10px; font-size: 0.95rem;">
-                                ${club.description || 'Explore our club initiatives.'}
-                            </p>
-                        </div>
-                        <div class="hover-overlay">View Achievements & Events 🏆</div>
-                    </div>
-                `).join('');
             })
             .catch(err => {
-                document.getElementById("clubContainer").innerHTML = "<h3>Database Error. Check server console!</h3>";
+                renderClubs(demoClubs);
             });
 
         async function openModal(index) {
             const club = allClubsData[index];
-            const eventRes = await fetch(`/api/clubs/events/${club.id}`);
-            const events = await eventRes.json();
+            let events = [];
+            try {
+                const eventRes = await fetch(`/api/clubs/events/${club.id}`);
+                events = await eventRes.json();
+            } catch (err) {
+                events = [];
+            }
 
             // MAPPING: Convert achievement string into bullet points
             let rawText = club.achievement_text || "";

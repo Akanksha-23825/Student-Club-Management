@@ -53,6 +53,31 @@
     </div>
 
     <script>
+        const demoClubs = [
+            { id: 1, club_name: "Accelerate", category: "Technical", description: "Innovation club focused on hackathons, bootcamps, and rapid prototyping." },
+            { id: 2, club_name: "ACM RVCE", category: "Technical", description: "Official student body of the Association for Computing Machinery (ACM)." },
+            { id: 4, club_name: "Anoraniya", category: "Technical", description: "Quantum Technology Club exploring quantum mechanics and advanced computing." },
+            { id: 5, club_name: "Ashwa Racing", category: "Technical", description: "Formula Student team focusing on motorsports innovation and engineering excellence." },
+            { id: 6, club_name: "Astra Robotics", category: "Technical", description: "Robotics research club advancing autonomous systems and AI integration." },
+            { id: 10, club_name: "Coding Club", category: "Technical", description: "Promoting campus coding culture, competitive programming, and web development." },
+            { id: 13, club_name: "Dhruva", category: "Technical", description: "The official Astrophysics club of RVCE exploring the wonders of the universe." },
+            { id: 19, club_name: "Frequency Club", category: "Technical", description: "Technical innovation hub fostering creativity and cross-domain engineering." },
+            { id: 20, club_name: "GDG RVCE", category: "Technical", description: "Google Developer Groups on Campus focusing on modern software frameworks." },
+            { id: 21, club_name: "Ham Club", category: "Technical", description: "Amateur radio club exploring communication domains and wireless technologies." },
+            { id: 24, club_name: "Project Garuda", category: "Technical", description: "The Super Mileage Club of RVCE building ultra-fuel-efficient vehicles." },
+            { id: 25, club_name: "Project Jatayu", category: "Technical", description: "Student autonomous UAV (drone) team focused on aerial surveillance and automation." },
+            { id: 30, club_name: "SPARK", category: "Technical", description: "IUCEE Student Chapter dedicated to knowledge sharing and engineering education." },
+            { id: 32, club_name: "Team Antariksh", category: "Technical", description: "Student space technology club working on satellite and rocket systems." },
+            { id: 33, club_name: "Team Chimera", category: "Technical", description: "Electric formula student racing team focused on sustainable mobility." },
+            { id: 34, club_name: "Team Chitrak", category: "Technical", description: "Electric motorcycle design and fabrication team pushing the limits of EV tech." },
+            { id: 35, club_name: "Team Helios Racing", category: "Technical", description: "Off-road motorsports engineering team building rugged All-Terrain Vehicles (ATVs)." },
+            { id: 36, club_name: "Team KRUSHI", category: "Technical", description: "Agricultural innovation team creating technology-driven solutions for farmers." },
+            { id: 38, club_name: "Vyoma", category: "Technical", description: "Aero-design team and NASA Systems Engineering Award winner specializing in UAVs." },
+            { id: 39, club_name: "Women in Cloud", category: "Technical", description: "Socio-technical team empowering women in tech through cloud computing workshops." },
+            { id: 52, club_name: "Mechatronics Club", category: "Technical", description: "Mechatronics club" },
+            { id: 54, club_name: "Dance Club", category: "Technical", description: "hellooo" }
+        ];
+
         let allClubsData = [];
         const role = localStorage.getItem("role");
         const currentUsername = localStorage.getItem("username");
@@ -60,35 +85,48 @@
         // The logic below automatically fetches "Technical" clubs because we fixed the <title>
         const categoryName = document.title.includes("Cultural") ? "Cultural" : "Technical";
         
+        function renderClubs(data) {
+            allClubsData = data;
+            const container = document.getElementById("clubContainer");
+            if (data.length === 0) {
+                container.innerHTML = "<h3>No clubs found in this category.</h3>";
+                return;
+            }
+            container.innerHTML = data.map((club, index) => `
+                <div class="club-card" onclick="openModal(${index})">
+                    <div>
+                        <h2>${club.club_name}</h2>
+                        <p style="color: #64748b; margin-top: 10px; font-size: 0.95rem;">
+                            ${club.description || 'Explore our club initiatives.'}
+                        </p>
+                    </div>
+                    <div class="hover-overlay">View Achievements & Events 🏆</div>
+                </div>
+            `).join('');
+        }
+
         fetch(`/api/clubs/category/${categoryName}`)
             .then(res => res.json())
             .then(data => {
-                allClubsData = data;
-                const container = document.getElementById("clubContainer");
-                if (data.length === 0) {
-                    container.innerHTML = "<h3>No clubs found in this category.</h3>";
-                    return;
+                if (Array.isArray(data) && data.length > 0) {
+                    renderClubs(data);
+                } else {
+                    renderClubs(demoClubs);
                 }
-                container.innerHTML = data.map((club, index) => `
-                    <div class="club-card" onclick="openModal(${index})">
-                        <div>
-                            <h2>${club.club_name}</h2>
-                            <p style="color: #64748b; margin-top: 10px; font-size: 0.95rem;">
-                                ${club.description || 'Explore our club initiatives.'}
-                            </p>
-                        </div>
-                        <div class="hover-overlay">View Achievements & Events 🏆</div>
-                    </div>
-                `).join('');
             })
             .catch(err => {
-                document.getElementById("clubContainer").innerHTML = "<h3>Database Error. Check Server!</h3>";
+                renderClubs(demoClubs);
             });
 
         async function openModal(index) {
             const club = allClubsData[index];
-            const eventRes = await fetch(`/api/clubs/events/${club.id}`);
-            const events = await eventRes.json();
+            let events = [];
+            try {
+                const eventRes = await fetch(`/api/clubs/events/${club.id}`);
+                events = await eventRes.json();
+            } catch (err) {
+                events = [];
+            }
 
             let rawText = club.achievement_text || "";
             const isPlaceholder = rawText.toLowerCase().includes("milestones coming soon") || 
