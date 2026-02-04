@@ -61,6 +61,10 @@
         </div>
 
         <button class="btn" onclick="handleAuth()" id="auth-btn">Sign In</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:#22c55e; box-shadow:none; margin-top:0;" onclick="demoLogin('student')">Demo Student</button>
+            <button class="btn" style="background:#f97316; box-shadow:none; margin-top:0;" onclick="demoLogin('faculty')">Demo Faculty</button>
+        </div>
         <span class="toggle-link" onclick="toggleMode()" id="toggle-text">New to the portal? Create an account</span>
         <p style="margin-top: 14px; color:#94a3b8; font-size:12px;">By continuing, you agree to the campus usage guidelines.</p>
     </div>
@@ -125,6 +129,16 @@
                 console.error("Auth Error:", err);
                 alert("Server connection failed. Make sure your backend is running.");
             });
+        }
+
+        function demoLogin(role) {
+            localStorage.setItem("role", role);
+            localStorage.setItem("username", role === "faculty" ? "demo_faculty" : "demo_student");
+            if (role === "faculty") {
+                window.location.href = "faculty_dashboard.html";
+            } else {
+                window.location.href = "index.html";
+            }
         }
     </script>
 </body>
